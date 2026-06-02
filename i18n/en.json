@@ -1,0 +1,527 @@
+{
+  "meta": {
+    "lang": "en",
+    "lang_name": "English"
+  },
+  "header": {
+    "logo_alt": "Compo logo",
+    "tagline": "Prompt · Agent · Skill",
+    "modes": {
+      "guided": "Guided",
+      "expert": "Expert"
+    },
+    "toggle_lang_aria": "Change language",
+    "toggle_theme_aria": "Change theme",
+    "toggle_theme_light": "Light theme",
+    "toggle_theme_dark": "Dark theme",
+    "toggle_theme_auto": "Auto theme",
+    "nav": {
+      "prompt": "Prompt",
+      "agent": "Agent",
+      "skill": "Skill"
+    },
+    "shutdown": {
+      "button": "Shut down",
+      "aria": "Shut down Compo and close the local server",
+      "confirm": "Shut down Compo? This will stop the local server started with start.bat or start.sh. Ollama will keep running if it is running as a separate service.",
+      "in_progress": "Shutting down…",
+      "unavailable": "Compo could not be shut down from the interface ({message}). This function is only available when the app has been started with this version of start.bat or start.sh. You can close the terminal manually with Ctrl+C.",
+      "closed_title": "Compo has shut down",
+      "closed_body": "The local server has received the shutdown request. If you opened Compo with the startup script, the console should close or return to the prompt.",
+      "closed_note": "Ollama is not stopped by Compo: it is a separate service. You can close this browser tab.",
+      "close_tab": "Close tab",
+      "close_tab_manual": "Close this tab manually"
+    },
+    "usage": "Use",
+    "license": "License"
+  },
+  "ollama": {
+    "active": "Local AI assistance active",
+    "inactive": "Local AI assistance not detected",
+    "active_with_model": "Local AI assistance active · Model: {model}",
+    "inactive_help": "Tap here to set up Ollama",
+    "ephemeral": "Ephemeral mode",
+    "open_settings": "Open model settings"
+  },
+  "welcome": {
+    "title": "What do you want to build today?",
+    "subtitle": "Pick the artefact type. Everything runs on your machine.",
+    "cards": {
+      "prompt": {
+        "title": "Prompt",
+        "desc": "A single instruction for one interaction."
+      },
+      "agent": {
+        "title": "Agent",
+        "desc": "A specialised assistant with stable role and rules."
+      },
+      "skill": {
+        "title": "Skill",
+        "desc": "A reusable capability for assistants compatible with persistent instructions.",
+        "badge": "Recommended"
+      }
+    },
+    "templates": {
+      "title": "Or start from a template",
+      "verifier": {
+        "name": "AI quality verifier",
+        "desc": "Audits responses from language models"
+      },
+      "compressor": {
+        "name": "Response compressor",
+        "desc": "Reduces tokens while preserving core meaning"
+      },
+      "isad": {
+        "name": "ISAD(G) description",
+        "desc": "International archival standard"
+      },
+      "all": {
+        "name": "View all templates",
+        "desc": "Full catalogue"
+      },
+      "research_agent": {
+        "name": "Document review agent",
+        "desc": "Specialised assistant for corpus analysis"
+      }
+    },
+    "coming_soon": "Coming soon"
+  },
+  "skill_form": {
+    "breadcrumb": {
+      "home": "Home",
+      "skill": "Skill",
+      "step": "Step {n} of 8"
+    },
+    "steps": {
+      "1": "Identification",
+      "2": "Activation",
+      "3": "Behavior",
+      "4": "Workflow",
+      "5": "Output",
+      "6": "Resources",
+      "7": "Distribution",
+      "8": "Export"
+    },
+    "questions": {
+      "activation": {
+        "tag": "Question 1 of 3",
+        "label": "When should this skill be used?",
+        "help": "This is the most important field. It determines when Claude will trigger the skill. Start with an imperative trigger and describe the context.",
+        "placeholder": "E.g. Use this skill when the archivist asks to draft an ISAD(G) description for a simple or compound documentary unit..."
+      }
+    },
+    "validation": {
+      "chars": "{n} characters",
+      "above_threshold": "above recommended threshold",
+      "below_threshold": "below minimum threshold (200)",
+      "saved": "Saved",
+      "chars_zero": "characters",
+      "chars_one": "character"
+    },
+    "ai_suggestion": {
+      "title": "Compo suggestion",
+      "apply": "Apply",
+      "another": "Another variant",
+      "dismiss": "Dismiss",
+      "improve_button_aria": "Improve this field with local AI",
+      "unavailable_title": "AI assistance not available yet",
+      "unavailable_body": "In-form AI assistance will arrive in the next version of Compo. Model detection and download already work; the Ollama wiring to suggest improvements per field is in preparation.",
+      "unavailable_no_ollama": "No Ollama instance detected at localhost:11434. Make sure the service is running and check docs/INSTALAR-OLLAMA.es.md."
+    },
+    "nav": {
+      "back": "Back",
+      "next": "Next",
+      "hint": "Press Enter or use the buttons to advance"
+    }
+  },
+  "audit": {
+    "breadcrumb": "Audit",
+    "title": "Audit results",
+    "subtitle": "Cross-checked role, workflow, guardrails and examples · {n} findings",
+    "stats": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "findings": {
+      "field": "Field:",
+      "fields": "Fields:",
+      "suggestion": "Suggestion:",
+      "apply": "Apply",
+      "edit": "Edit first",
+      "dismiss": "Dismiss",
+      "show_more": "Show {n} more findings"
+    },
+    "footer": {
+      "disclaimer": "The audit is a draft review. Final judgement is yours.",
+      "review_one": "Review one by one",
+      "apply_all": "Apply all suggestions"
+    },
+    "placeholder": "The detailed audit is reserved for a later phase. Current generation already includes scope, format and human-review controls."
+  },
+  "models": {
+    "breadcrumb": "Local AI model",
+    "title": "Local AI model",
+    "subtitle": "Compo uses models downloaded on your machine via Ollama. Nothing leaves your computer.",
+    "active": {
+      "title": "Active model",
+      "desc": "The model Compo uses to generate suggestions and audits.",
+      "in_use": "In use",
+      "change": "Change",
+      "size": "Size on disk: {size}",
+      "none": "No active model. Download or select one below."
+    },
+    "downloaded": {
+      "title": "Downloaded models",
+      "desc": "Models available in your Ollama installation. Compo can select them, not delete them.",
+      "use": "Use",
+      "delete": "Delete",
+      "empty": "You haven't downloaded any models yet.",
+      "loading": "Querying downloaded models...",
+      "refresh": "Refresh models"
+    },
+    "recommended": {
+      "title": "Recommended models",
+      "desc": "A curated selection for different hardware profiles. Direct download from the official Ollama registry.",
+      "download": "Download",
+      "already": "Already downloaded",
+      "options": {
+        "light": {
+          "tagline": "Light",
+          "desc": "Fast responses but less nuanced. For machines with 8 GB of RAM or less."
+        },
+        "balanced": {
+          "tagline": "Balanced · recommended",
+          "desc": "Best quality-speed trade-off for this tool. For machines with 16 GB of RAM."
+        },
+        "powerful": {
+          "tagline": "Powerful",
+          "desc": "Better audit quality and suggestions. For machines with 16 GB of RAM or more."
+        },
+        "alternative": {
+          "tagline": "Alternative",
+          "desc": "Robust, well-tested model on instruction-following tasks. For machines with 16 GB of RAM."
+        }
+      }
+    },
+    "downloading": {
+      "title": "Downloading {model}",
+      "desc": "This may take several minutes depending on your connection. Don't close the window.",
+      "starting": "Starting download...",
+      "verifying": "Verifying manifest...",
+      "downloading_layer": "Downloading layer {layer}",
+      "extracting": "Extracting...",
+      "completed": "Model downloaded and available.",
+      "error": "Failed to download model: {message}",
+      "cancel": "Cancel",
+      "close": "Close"
+    },
+    "delete_confirm": {
+      "title": "Delete {model}",
+      "desc": "The model will be removed from your disk. You'll have to download it again to use it.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "footer": {
+      "info": "Models are downloaded from registry.ollama.ai. Compo does not host models."
+    },
+    "delete_disabled": "Compo does not delete local models from the interface. Manage them manually with the Ollama CLI if needed."
+  },
+  "footer": {
+    "security": "No telemetry · No external services · Ephemeral mode active",
+    "privacy": "Privacy",
+    "security_link": "Security",
+    "first_start": "First start",
+    "usage": "Use",
+    "license": "License"
+  },
+  "noscript": "Compo needs JavaScript enabled to work. All logic runs in your browser, with no external connections except your own local Ollama.",
+  "accessibility": {
+    "skip": "Skip to content"
+  },
+  "builder": {
+    "breadcrumb": {
+      "home": "Home"
+    },
+    "types": {
+      "prompt": {
+        "label": "Prompt",
+        "title": "Prompt builder",
+        "help": "Write in natural language what you want to achieve. Compo will turn that intent into a complete, reusable and verifiable prompt with local Ollama or, if no model is active, with a deterministic structure.",
+        "step": "Initial idea · Assisted generation",
+        "badge": "Prompt"
+      },
+      "agent": {
+        "label": "Agent",
+        "title": "Agent Builder",
+        "help": "Describe the assistant you need and its context. Compo will build identity, mission, boundaries, procedure, response format and quality criteria.",
+        "step": "Initial idea · Assisted Agent Builder",
+        "badge": "Agent"
+      },
+      "skill": {
+        "label": "Skill",
+        "title": "Skill builder",
+        "help": "Describe the capability you want to create. Compo will generate a complete SKILL.md with activation, non-activation, workflow, output format, guardrails and human review.",
+        "step": "Initial idea · Assisted Skill Builder",
+        "badge": "Skill"
+      }
+    },
+    "progress": {
+      "prompt_left": "1. Short instruction",
+      "prompt_right": "2. Structured prompt · 3. Review · 4. Export",
+      "agent_left": "1. Agent need",
+      "agent_right": "2. Operating design · 3. Boundaries · 4. Export",
+      "skill_left": "1. Desired capability",
+      "skill_right": "2. Activation · 3. Guardrails · 4. SKILL.md"
+    },
+    "fields": {
+      "title": {
+        "label": "Internal title",
+        "help": "Short name to recognise the prompt.",
+        "placeholder": "E.g. AI response evaluator"
+      },
+      "task": {
+        "label": "Main task",
+        "help": "Describe precisely what the model should do.",
+        "placeholder": "E.g. Analyse an AI answer and detect errors, gaps and improvements."
+      },
+      "context": {
+        "label": "Use context",
+        "help": "Indicate domain, input material and professional situation.",
+        "placeholder": "E.g. Use in courses for archives, libraries and documentation professionals."
+      },
+      "audience": {
+        "label": "Audience",
+        "help": "Person or group the output is aimed at.",
+        "placeholder": "E.g. Information professionals with intermediate AI knowledge."
+      },
+      "output": {
+        "label": "Output format",
+        "help": "Expected response structure.",
+        "placeholder": "E.g. Table with criterion, assessment, evidence and recommendation."
+      },
+      "constraints": {
+        "label": "Constraints and quality criteria",
+        "help": "Limits, tone, sources, length, checks and warnings.",
+        "placeholder": "E.g. Do not invent sources. Separate facts and inferences. Add a reliability note."
+      },
+      "agent_name": {
+        "label": "Agent name",
+        "help": "Short, recognisable name.",
+        "placeholder": "E.g. Academic documentation agent"
+      },
+      "purpose": {
+        "label": "Purpose",
+        "help": "Stable objective of the agent.",
+        "placeholder": "E.g. Help analyse academic documents and extract relevant evidence."
+      },
+      "role": {
+        "label": "Role and identity",
+        "help": "Professional profile, tone and working approach.",
+        "placeholder": "E.g. Act as a senior information professional with methodological judgement."
+      },
+      "tasks": {
+        "label": "Main tasks",
+        "help": "Operations the agent should perform.",
+        "placeholder": "E.g. Summarise, compare, extract concepts, detect gaps, propose questions."
+      },
+      "inputs": {
+        "label": "Expected inputs",
+        "help": "Information types the agent will receive.",
+        "placeholder": "E.g. Pasted texts, notes, transcripts, references, converted PDFs."
+      },
+      "tools": {
+        "label": "Tools or resources",
+        "help": "Allowed capabilities if the environment provides them.",
+        "placeholder": "E.g. Local search, file reading, table extraction, text comparison."
+      },
+      "limits": {
+        "label": "Limits and guardrails",
+        "help": "What the agent must not do and when human review is required.",
+        "placeholder": "E.g. Do not invent citations. Do not replace legal or professional judgement."
+      },
+      "agent_output": {
+        "label": "Agent response format",
+        "help": "Usual response structure.",
+        "placeholder": "E.g. Diagnosis, evidence, proposal, risks and reliability note."
+      },
+      "skill_name": {
+        "label": "Skill name",
+        "help": "Readable name. The technical identifier should be short, semantic, stable, lowercase, and hyphenated.",
+        "placeholder": "E.g. ISAD(G) archival description"
+      },
+      "slug": {
+        "label": "Slug",
+        "help": "Safe technical identifier: short, semantic, lowercase, hyphenated, and preferably under 64 characters.",
+        "placeholder": "E.g. isadg-description"
+      },
+      "description": {
+        "label": "Activation description",
+        "help": "Semantic capability description. For skills, it must help Claude decide when to activate it: what it does and which user requests should trigger it.",
+        "placeholder": "E.g. Optimizes prompts for Claude by reducing tokens without losing meaning, structure, or output quality. Use when the user asks to shorten, compact, refine, compress, or improve an instruction, prompt, agent, or skill."
+      },
+      "activation": {
+        "label": "Activation criteria",
+        "help": "Natural usage triggers: words, verbs, tasks, and contexts Claude should recognize to activate the skill.",
+        "placeholder": "E.g. Use this skill when the user asks to draft or review an archival description."
+      },
+      "non_activation": {
+        "label": "Non-activation criteria",
+        "help": "Cases where the skill must not be used.",
+        "placeholder": "E.g. Do not use to certify legal validity or fill data without evidence."
+      },
+      "workflow": {
+        "label": "Workflow",
+        "help": "Operational sequence the assistant must follow.",
+        "placeholder": "E.g. 1. Identify description level. 2. Extract evidence. 3. Propose fields. 4. Flag doubts."
+      },
+      "skill_output": {
+        "label": "Skill output format",
+        "help": "How results should be returned.",
+        "placeholder": "E.g. Table with ISAD(G) field, proposed value, evidence, inference and confidence."
+      },
+      "guardrails": {
+        "label": "Guardrails",
+        "help": "Security, scope and human-review controls.",
+        "placeholder": "E.g. Do not invent data. Mark inferences. Require professional review."
+      },
+      "examples": {
+        "label": "Examples",
+        "help": "Use cases, preferably anonymised.",
+        "placeholder": "E.g. Input: file transcript. Output: proposed descriptive fields."
+      },
+      "brief": {
+        "prompt": {
+          "label": "Describe the prompt you need",
+          "help": "Write a natural instruction. You do not need to separate role, context, format and constraints: Compo will do that for you.",
+          "placeholder": "E.g. I need a prompt to assess AI-generated answers in courses for archivists and librarians. It should detect errors, hallucinations, weak evidence, bias and concrete improvements, with a final reliability note."
+        },
+        "agent": {
+          "label": "Describe the agent you want to build",
+          "help": "Say what it should do, for whom, with what limits and in what context. Compo will complete the operating design.",
+          "placeholder": "E.g. I want an academic documentalist agent that reads long texts, extracts arguments and evidence, proposes analysis matrices and warns when data are missing or citations may be fabricated."
+        },
+        "skill": {
+          "label": "Describe the skill you want to create",
+          "help": "Explain the capability the assistant should activate. Compo will generate a complete and reviewable SKILL.md.",
+          "placeholder": "E.g. I need a skill for ISAD(G) archival description. It should work with document transcripts, propose descriptive fields, separate literal evidence from inference, estimate confidence and require professional review."
+        }
+      }
+    },
+    "actions": {
+      "generate": "Generate",
+      "copy": "Copy",
+      "download": "Download",
+      "clear": "Clear",
+      "back_home": "Back",
+      "regenerate": "Regenerate",
+      "review": "Review",
+      "improve_instruction": "Improve instruction",
+      "clear_result": "Delete",
+      "clear_review": "Clear review",
+      "clear_current": "Clear this section",
+      "clear_all": "Delete all",
+      "export_project": "Export project",
+      "import_project": "Import project"
+    },
+    "nav": {
+      "hint": "The main input is a short instruction. Ollama turns it into a full artefact; without an active model, Compo generates a local fallback structure."
+    },
+    "result": {
+      "title": "Generated result",
+      "empty": "Write the short instruction and press generate.",
+      "placeholder": "The result will appear here. You can edit it before copying or downloading it.",
+      "generated_with_model": "Generated with Ollama · Model: {model}",
+      "generated_local": "Generated in structured non-AI mode because no active model is available."
+    },
+    "status": {
+      "required_title": "Required field missing",
+      "required_body": "Complete this field: {field}.",
+      "generating_title": "Generating",
+      "generating_body": "Compo is turning the short instruction into a complete artefact. If Ollama is active, the selected local model will be used.",
+      "local_title": "Non-AI mode",
+      "local_body": "No active model was detected. A local fallback structure based on the short instruction has been used.",
+      "ollama_error_title": "Ollama did not complete generation",
+      "ollama_error_body": "A local structured version is provided. Error: {message}",
+      "ollama_error_append": "Note: Ollama did not complete generation. A local structured version is kept. Error: {message}",
+      "done_title": "Generation complete",
+      "done_body": "Result generated with local model {model}.",
+      "copied_title": "Copied",
+      "copied_body": "The result was copied to the clipboard.",
+      "pii_confirm": "The content appears to include possible personal data or identifiers: {labels}. Review before downloading. Continue?",
+      "regenerating_title": "Regenerating",
+      "improving_title": "Improving instruction",
+      "improving_body": "Compo is turning the initial instruction into a clearer, more specific and actionable request.",
+      "improved_title": "Instruction improved",
+      "improved_body_model": "The instruction was improved with local model {model}. Review it before generating.",
+      "improved_body_local": "The instruction was improved with a local non-AI template. Review it before generating.",
+      "reviewing_title": "Reviewing result",
+      "reviewing_body": "Compo is auditing the current proposal to detect issues, risks and concrete improvements.",
+      "review_done_title": "Review complete",
+      "review_done_body_model": "The review was generated with local model {model}.",
+      "review_done_body_local": "The review was generated in local non-AI mode.",
+      "clear_all_confirm": "This will delete instructions, results, reviews and history for Prompt, Agent and Skill in this session. Continue?",
+      "imported_title": "Project imported",
+      "imported_body": "The local Compo project was restored.",
+      "import_error_title": "Import failed",
+      "import_error_body": "The file does not seem to be a valid Compo project. Error: {message}",
+      "empty_model_response": "Ollama returned an empty response. Compo will use the local fallback structure; try another model or shorten the instruction."
+    },
+    "advanced": {
+      "summary": "Optional advanced fields",
+      "help": "You do not have to fill these in. Use them only when you need tighter control; the short instruction remains the main input."
+    },
+    "history": {
+      "empty": "No history",
+      "current": "Current version",
+      "generated": "Generated",
+      "regenerated": "Regenerated"
+    },
+    "review": {
+      "title": "Critical review",
+      "help": "Diagnostic generated for the current proposal. It does not replace professional review."
+    },
+    "portable": {
+      "label": "Portable mode",
+      "help": "Generates the skill without references to Claude so it can be used with other assistants (ChatGPT, local assistants, etc.)."
+    }
+  },
+  "usage": {
+    "breadcrumb": "Instructions",
+    "title": "Instructions",
+    "subtitle": "Brief guide for working with Compo local and Ollama.",
+    "quick": {
+      "title": "Recommended workflow",
+      "step1": "Choose Prompt, Agent or Skill from the top menu.",
+      "step2": "Write your need in natural language: objective, audience, context and limits.",
+      "step3": "Press Generate. If Ollama is active, Compo will use the selected local model; otherwise, it will create a fallback structure.",
+      "step4": "Review the result. Use Regenerate for a variant or Review for a critical audit.",
+      "step5": "Copy, download or export the project. When finished, press Shut down to close the local Compo server."
+    },
+    "ollama": {
+      "title": "Ollama and models",
+      "body": "Compo detects models installed in Ollama, lets you choose the active model and offers recommended downloads. For operational safety, Compo does not delete local models from the interface."
+    },
+    "first_start": {
+      "title": "First start",
+      "body": "For installation and first start, see the brief guide included in the docs folder.",
+      "link": "Open first-start guide"
+    },
+    "safety": {
+      "title": "Safe-use criteria",
+      "item1": "Do not paste personal or confidential data unless the local context is appropriate and you are authorised.",
+      "item2": "Manually review prompts, agents and skills before production use.",
+      "item3": "Generated skills should be treated as operational drafts: check activation, limits, examples and guardrails.",
+      "item4": "Ollama is an independent service: shutting down Compo does not shut down Ollama."
+    }
+  },
+  "license": {
+    "breadcrumb": "License",
+    "title": "License",
+    "subtitle": "Compo is distributed as a local beta under a restrictive use license, not under MIT.",
+    "summary": "Permitted use: evaluation, personal use, internal professional use and non-redistributive training. Public redistribution, resale, sublicensing, publication of modified versions or removal of authorship notices are prohibited without express written permission.",
+    "notice": "This screen summarises the license included in the LICENSE file. If there is any doubt, the full LICENSE text prevails.",
+    "open_file": "Open LICENSE"
+  }
+}

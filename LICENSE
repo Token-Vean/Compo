@@ -1,0 +1,62 @@
+Compo Local Beta License v0.1
+
+Copyright © 2026 Víctor Villapalos Pardiñas
+Web: https://www.victorvillapalos.es
+
+
+Nota sobre publicación autorizada en GitHub:
+
+La publicación de Compo por su titular en un repositorio público de GitHub se realiza únicamente para facilitar revisión, transparencia, evaluación y acceso a la versión beta autorizada. Dicha publicación no convierte Compo en software open source ni concede permisos adicionales de redistribución, publicación de derivados, reventa, sublicencia o integración comercial. Las funcionalidades técnicas de GitHub, como la visualización o el fork dentro de la plataforma, no alteran los límites de esta licencia para usos fuera de los expresamente autorizados.
+
+1. Titularidad
+
+Compo, incluyendo su código, documentación, prompts internos, plantillas, diseño, estructura funcional y materiales asociados, es titularidad de Víctor Villapalos Pardiñas, salvo aquellos componentes de terceros que conserven su propia licencia.
+
+2. Usos permitidos
+
+Se concede una licencia limitada, revocable, no exclusiva, no sublicenciable y no transferible para:
+
+- Ejecutar Compo en local con fines de evaluación.
+- Utilizar Compo para uso personal o profesional interno.
+- Utilizar Compo en actividades formativas, talleres o demostraciones internas siempre que no se redistribuya el software ni se eliminen los avisos de autoría.
+- Generar prompts, agentes o skills para uso propio o institucional interno, bajo responsabilidad de la persona usuaria.
+
+3. Usos no permitidos sin autorización previa y por escrito
+
+Queda prohibido:
+
+- Redistribuir públicamente Compo, total o parcialmente.
+- Publicar copias, forks, mirrors o versiones modificadas de Compo.
+- Revender, alquilar, sublicenciar, integrar comercialmente o explotar Compo como producto o servicio propio.
+- Eliminar, ocultar o modificar avisos de autoría, licencia, web del autor o referencias de titularidad.
+- Presentar Compo como herramienta desarrollada por otra persona, entidad o marca.
+- Incorporar Compo a repositorios públicos, marketplaces, paquetes instalables o distribuciones de terceros sin autorización.
+- Usar Compo para generar, facilitar o automatizar actividades ilícitas, invasivas, engañosas, de reidentificación de personas o contrarias a derechos fundamentales.
+
+4. Modificaciones
+
+Se permite modificar Compo únicamente para uso privado o interno. Las modificaciones no podrán publicarse, redistribuirse ni transferirse a terceros sin autorización previa y por escrito del titular.
+
+5. Resultados generados
+
+Los prompts, agentes, skills u otros artefactos generados por la persona usuaria pueden ser utilizados por esta bajo su propia responsabilidad, siempre que dicho uso no implique redistribuir Compo ni atribuir al autor responsabilidad sobre los resultados.
+
+6. Ausencia de garantías
+
+Compo se proporciona “tal cual”, en versión beta, sin garantías de disponibilidad, exactitud, idoneidad para un fin concreto, ausencia de errores, compatibilidad con modelos locales ni adecuación legal, técnica o profesional de los resultados generados.
+
+7. Responsabilidad
+
+La persona usuaria es responsable de revisar cualquier resultado antes de usarlo en producción, publicación, docencia, gestión institucional o contextos sensibles. Compo no sustituye criterio profesional, revisión jurídica, auditoría técnica ni validación institucional.
+
+8. Revocación
+
+El titular podrá revocar esta licencia en caso de incumplimiento de sus condiciones. Tras la revocación, la persona usuaria deberá cesar el uso de Compo y eliminar las copias obtenidas.
+
+9. Contacto
+
+Para solicitar autorización de distribución, integración, publicación, formación externa o uso comercial, contactar a través de:
+
+https://www.victorvillapalos.es
+
+Nota: este texto es una licencia privada redactada para distribución beta. Si se prevé una distribución amplia o comercial, se recomienda revisión jurídica especializada.

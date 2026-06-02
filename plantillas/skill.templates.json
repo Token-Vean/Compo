@@ -1,0 +1,34 @@
+{
+  "isad": {
+    "type": "skill",
+    "data": {
+      "brief": "Necesito una skill para ayudar a proponer borradores de descripción archivística conforme a ISAD(G) a partir de transcripciones o información textual de unidades documentales, series, fondos o colecciones. Debe activarse cuando el usuario pida redactar, revisar, normalizar o comprobar una descripción archivística ISAD(G). Debe separar evidencia literal e inferencias, no inventar datos, estimar confianza, señalar lagunas y exigir revisión profesional antes de uso institucional.",
+      "name": "Descripción archivística ISAD(G)",
+      "slug": "descripcion-isadg"
+    }
+  },
+  "prompt-optimizer-skill": {
+    "type": "skill",
+    "data": {
+      "brief": "Necesito una skill para optimizar prompts para Claude reduciendo tokens sin perder significado, estructura ni calidad de salida. Debe activarse cuando el usuario pida acortar, compactar, depurar, comprimir, reducir tokens o mejorar una instrucción, prompt, system prompt, agente o skill. No debe prometer conteo exacto de tokens si no hay contador real ni scripts auxiliares.",
+      "name": "Optimizador de prompts Claude",
+      "slug": "optimizador-prompts-claude"
+    }
+  },
+  "glam-ai-governance-skill": {
+    "type": "skill",
+    "data": {
+      "brief": "Quiero crear una skill para revisar documentos de gobernanza ética de inteligencia artificial en instituciones GLAM —bibliotecas, archivos, museos y centros de documentación—. Debe activarse cuando el usuario pida evaluar, revisar, auditar o mejorar una política, protocolo, guía, matriz de riesgos o procedimiento institucional relacionado con IA en contextos patrimoniales, documentales o culturales. Debe comprobar si el documento contempla transparencia, supervisión humana, sesgos, protección de datos, propiedad intelectual, seguridad, trazabilidad, explicabilidad, impacto en usuarios y revisión periódica. No debe certificar cumplimiento legal ni inventar requisitos normativos. La salida debe incluir diagnóstico, tabla de revisión por dimensiones con evidencia textual, riesgos detectados, recomendaciones priorizadas y preguntas de verificación.",
+      "name": "Revisor gobernanza IA GLAM",
+      "slug": "revisor-gobernanza-ia-glam"
+    }
+  },
+  "document-anonymization-skill": {
+    "type": "skill",
+    "data": {
+      "brief": "Quiero crear una skill para revisar propuestas de anonimización y seudonimización de documentos en archivos, bibliotecas, centros de documentación e instituciones GLAM. Debe activarse cuando el usuario pida comprobar, revisar, mejorar o auditar una propuesta de eliminación, enmascaramiento, generalización, supresión o sustitución de datos personales en textos documentales. Debe detectar datos personales visibles, datos indirectamente identificativos, anonimización insuficiente, pérdida excesiva de contexto, riesgos de reidentificación y problemas de trazabilidad de decisiones. No debe certificar cumplimiento legal, no debe ayudar a reidentificar personas ni sustituir a un delegado de protección de datos, asesor jurídico o profesional responsable. La salida debe incluir diagnóstico, tabla con evidencia mínima o enmascarada por tipos de datos, riesgo de reidentificación, recomendaciones, propuesta revisada o criterios de mejora y preguntas de verificación.",
+      "name": "Revisor anonimización documental",
+      "slug": "revisor-anonimizacion-documental"
+    }
+  }
+}

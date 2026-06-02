@@ -1,0 +1,141 @@
+/* ===========================================================================
+   Compo · Tokens de diseño
+   Variables CSS para tema claro y oscuro. Toda la paleta de la aplicación
+   pasa por aquí; ningún color hardcodeado en el resto del CSS.
+   =========================================================================== */
+
+:root,
+:root[data-theme="light"] {
+  /* Fondos */
+  --compo-bg-page: #FAFAF9;
+  --compo-bg-card: #FFFFFF;
+  --compo-bg-subtle: #F4F4F2;
+  --compo-bg-accent: #E8F4F1;
+  --compo-bg-header: #FFFFFF;
+
+  /* Texto */
+  --compo-text-primary: #1F2937;
+  --compo-text-secondary: #6B7280;
+  --compo-text-tertiary: #9CA3AF;
+  --compo-text-on-primary: #FFFFFF;
+  --compo-text-on-accent: #1B5C4F;
+
+  /* Bordes */
+  --compo-border: #E5E7EB;
+  --compo-border-strong: #D1D5DB;
+  --compo-border-accent: #C9E3DB;
+
+  /* Marca */
+  --compo-primary: #2E9985;
+  --compo-primary-hover: #247568;
+  --compo-primary-active: #1F5B52;
+  --compo-primary-soft: #E8F4F1;
+
+  /* Semánticos */
+  --compo-danger: #A32D2D;
+  --compo-danger-soft: #FCEBEB;
+  --compo-danger-border: #F4C7C7;
+  --compo-warning: #BA7517;
+  --compo-warning-soft: #FAEEDA;
+  --compo-warning-border: #EDD3A6;
+  --compo-medium: #B5921F;
+  --compo-medium-soft: #FBF5DB;
+  --compo-medium-border: #EFE4A6;
+  --compo-success: #639922;
+  --compo-success-soft: #EAF3DE;
+  --compo-success-border: #C9DEAA;
+
+  /* Sombras (uso muy contenido) */
+  --compo-shadow-sm: 0 1px 2px rgba(15, 22, 20, 0.04);
+  --compo-shadow-md: 0 2px 8px rgba(15, 22, 20, 0.06);
+  --compo-shadow-focus: 0 0 0 3px rgba(46, 153, 133, 0.18);
+
+  /* Foco accesible */
+  --compo-focus-ring: 0 0 0 2px var(--compo-primary);
+}
+
+:root[data-theme="dark"] {
+  /* Fondos */
+  --compo-bg-page: #0F1614;
+  --compo-bg-card: #1A2421;
+  --compo-bg-subtle: #14201D;
+  --compo-bg-accent: #14241F;
+  --compo-bg-header: #1A2421;
+
+  /* Texto */
+  --compo-text-primary: #F3F4F6;
+  --compo-text-secondary: #9CA3AF;
+  --compo-text-tertiary: #6B7280;
+  --compo-text-on-primary: #FFFFFF;
+  --compo-text-on-accent: #B8E5D8;
+
+  /* Bordes */
+  --compo-border: #2D3937;
+  --compo-border-strong: #3D4A47;
+  --compo-border-accent: #1F4036;
+
+  /* Marca (mismo verde, mantiene identidad) */
+  --compo-primary: #2E9985;
+  --compo-primary-hover: #3DB89F;
+  --compo-primary-active: #5DCAB4;
+  --compo-primary-soft: #14241F;
+
+  /* Semánticos (más claros sobre fondo oscuro) */
+  --compo-danger: #E27575;
+  --compo-danger-soft: #2A1818;
+  --compo-danger-border: #6B2D2D;
+  --compo-warning: #D49B5B;
+  --compo-warning-soft: #2A1F11;
+  --compo-warning-border: #6B4F1F;
+  --compo-medium: #D4B45B;
+  --compo-medium-soft: #2A2510;
+  --compo-medium-border: #6B5A1F;
+  --compo-success: #8FBE5C;
+  --compo-success-soft: #1A2510;
+  --compo-success-border: #3D5A1F;
+
+  /* Sombras */
+  --compo-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --compo-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --compo-shadow-focus: 0 0 0 3px rgba(46, 153, 133, 0.35);
+
+  --compo-focus-ring: 0 0 0 2px var(--compo-primary);
+}
+
+/* Tipografía y espaciado: sin variantes claro/oscuro */
+:root {
+  --compo-font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --compo-font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --compo-fs-xs: 11px;
+  --compo-fs-sm: 12px;
+  --compo-fs-base: 13px;
+  --compo-fs-md: 14px;
+  --compo-fs-lg: 16px;
+  --compo-fs-xl: 20px;
+  --compo-fs-2xl: 24px;
+  --compo-fs-3xl: 28px;
+
+  --compo-fw-regular: 400;
+  --compo-fw-medium: 500;
+  --compo-fw-semibold: 600;
+
+  --compo-lh-tight: 1.3;
+  --compo-lh-normal: 1.5;
+  --compo-lh-relaxed: 1.6;
+
+  --compo-space-1: 4px;
+  --compo-space-2: 8px;
+  --compo-space-3: 12px;
+  --compo-space-4: 16px;
+  --compo-space-5: 24px;
+  --compo-space-6: 32px;
+  --compo-space-7: 48px;
+
+  --compo-radius-sm: 4px;
+  --compo-radius-md: 6px;
+  --compo-radius-lg: 8px;
+  --compo-radius-xl: 12px;
+
+  --compo-transition: 0.18s ease;
+}

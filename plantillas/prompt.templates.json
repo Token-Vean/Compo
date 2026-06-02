@@ -1,0 +1,16 @@
+{
+  "verifier": {
+    "type": "prompt",
+    "data": {
+      "brief": "Crea un prompt para evaluar críticamente una respuesta generada por IA. Debe servir en contextos profesionales de información, documentación, archivos o bibliotecas. Quiero que valore precisión, verificabilidad, cobertura, sesgos, omisiones, adecuación al contexto, riesgos y mejoras concretas. La salida debe ser un informe breve con nota de fiabilidad.",
+      "title": "Verificador de calidad IA"
+    }
+  },
+  "compressor": {
+    "type": "prompt",
+    "data": {
+      "brief": "Crea un prompt para comprimir textos largos conservando ideas nucleares, jerarquía argumental, terminología técnica, datos, cifras, nombres propios y advertencias metodológicas. Debe devolver una versión sintética y una lista de elementos eliminados o condensados.",
+      "title": "Compresor de respuestas"
+    }
+  }
+}

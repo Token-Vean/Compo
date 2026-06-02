@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Compo">
+  <title>Compo</title>
+  <desc>Cuatro piezas de puzzle blancas sobre fondo verde teal. Una de ellas está despegada y ligeramente girada en la esquina superior derecha.</desc>
+
+  <rect width="256" height="256" rx="48" fill="#2E9985"/>
+
+  <!--
+    Geometría del puzzle (cuando las 4 piezas están encajadas):
+    cuadrado total 152x152, esquina superior-izquierda en (52, 52),
+    cada pieza 76x76 separada por las líneas x=128 y y=128, tetones radio 13.
+
+    En el logo, la pieza superior-derecha está despegada y rotada arriba.
+    El grupo restante (TL + BL + BR) forma una "L" cuyo contorno externo
+    contiene dos tetones visibles (apuntando hacia el hueco de TR) y dos
+    cortes internos representados por líneas verdes finas.
+  -->
+
+  <!-- Contorno externo del grupo unido TL + BL + BR -->
+  <path fill="#FFFFFF" d="
+    M 56 52
+    H 128
+    V 77
+    a 13 13 0 0 1 0 26
+    V 128
+    H 153
+    a 13 13 0 0 0 26 0
+    H 200
+    a 4 4 0 0 1 4 4
+    V 200
+    a 4 4 0 0 1 -4 4
+    H 56
+    a 4 4 0 0 1 -4 -4
+    V 56
+    a 4 4 0 0 1 4 -4
+    Z
+  "/>
+
+  <!--
+    Cortes internos del grupo unido (líneas verdes encima del blanco):
+    - Frontera TL-BL: horizontal en y=128, con tetón saliente hacia BL.
+    - Frontera BL-BR: vertical en x=128, con tetón saliente hacia BR.
+    Cada línea se dibuja en dos tramos rectos a ambos lados del tetón
+    semicircular para sugerir el corte real de un puzzle.
+  -->
+  <g fill="none" stroke="#2E9985" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- TL ↔ BL: horizontal en y=128, tetón saliente hacia abajo (concavo desde arriba) -->
+    <path d="M 52 128 H 77 a 13 13 0 0 0 26 0 H 128"/>
+    <!-- BL ↔ BR: vertical en x=128 dentro del cuadrante inferior, tetón hacia la derecha -->
+    <path d="M 128 128 V 153 a 13 13 0 0 0 0 26 V 204"/>
+  </g>
+
+  <!--
+    Pieza superior-derecha despegada (TR), rotada -16° y desplazada a la
+    esquina superior derecha. Forma cuadrada con tetones donde encajaría
+    en el grupo: izquierdo entrante (recibe tetón de TL) y abajo entrante
+    (recibe tetón de BR). El borde superior y derecho son cerrados.
+  -->
+  <g transform="translate(168 22) rotate(-16 38 38)">
+    <path fill="#FFFFFF" d="
+      M 4 0
+      H 72
+      a 4 4 0 0 1 4 4
+      V 72
+      a 4 4 0 0 1 -4 4
+      H 51
+      a 13 13 0 0 0 -26 0
+      H 4
+      a 4 4 0 0 1 -4 -4
+      V 51
+      a 13 13 0 0 1 0 -26
+      V 4
+      a 4 4 0 0 1 4 -4
+      Z
+    "/>
+  </g>
+</svg>

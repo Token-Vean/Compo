@@ -1,0 +1,527 @@
+{
+  "meta": {
+    "lang": "es",
+    "lang_name": "Español"
+  },
+  "header": {
+    "logo_alt": "Logo de Compo",
+    "tagline": "Prompt · Agente · Skill",
+    "modes": {
+      "guided": "Guiado",
+      "expert": "Experto"
+    },
+    "toggle_lang_aria": "Cambiar idioma",
+    "toggle_theme_aria": "Cambiar tema",
+    "toggle_theme_light": "Tema claro",
+    "toggle_theme_dark": "Tema oscuro",
+    "toggle_theme_auto": "Tema automático",
+    "nav": {
+      "prompt": "Prompt",
+      "agent": "Agente",
+      "skill": "Skill"
+    },
+    "shutdown": {
+      "button": "Apagar",
+      "aria": "Apagar Compo y cerrar el servidor local",
+      "confirm": "¿Quieres apagar Compo? Se cerrará el servidor local iniciado con start.bat o start.sh. Ollama seguirá funcionando si está ejecutándose como servicio independiente.",
+      "in_progress": "Apagando…",
+      "unavailable": "No se ha podido apagar Compo desde la interfaz ({message}). Esta función solo está disponible si has iniciado la aplicación con start.bat o start.sh de esta versión. Puedes cerrar la terminal manualmente con Ctrl+C.",
+      "closed_title": "Compo se ha apagado",
+      "closed_body": "El servidor local ha recibido la orden de cierre. Si abriste Compo con el script de arranque, la consola debería cerrarse o volver al prompt.",
+      "closed_note": "Ollama no se apaga desde Compo: es un servicio independiente. Puedes cerrar esta pestaña del navegador.",
+      "close_tab": "Cerrar pestaña",
+      "close_tab_manual": "Puedes cerrarla manualmente"
+    },
+    "usage": "Uso",
+    "license": "Licencia"
+  },
+  "ollama": {
+    "active": "Asistencia IA local activa",
+    "inactive": "Asistencia IA local no detectada",
+    "active_with_model": "Asistencia IA local activa · Modelo: {model}",
+    "inactive_help": "Toca aquí para configurar Ollama",
+    "ephemeral": "Modo efímero",
+    "open_settings": "Abrir ajustes de modelos"
+  },
+  "welcome": {
+    "title": "¿Qué quieres crear hoy?",
+    "subtitle": "Elige el tipo de artefacto. Todo se procesa en tu máquina.",
+    "cards": {
+      "prompt": {
+        "title": "Prompt",
+        "desc": "Una instrucción concreta para una sola interacción."
+      },
+      "agent": {
+        "title": "Agente",
+        "desc": "Un asistente especializado con rol y reglas estables."
+      },
+      "skill": {
+        "title": "Skill",
+        "desc": "Una capacidad reutilizable para asistentes compatibles con instrucciones persistentes.",
+        "badge": "Recomendado"
+      }
+    },
+    "templates": {
+      "title": "O empezar desde una plantilla",
+      "verifier": {
+        "name": "Verificador de calidad IA",
+        "desc": "Audita respuestas de modelos"
+      },
+      "compressor": {
+        "name": "Compresor de respuestas",
+        "desc": "Reduce tokens preservando núcleo"
+      },
+      "isad": {
+        "name": "Descripción ISAD(G)",
+        "desc": "Norma archivística internacional"
+      },
+      "all": {
+        "name": "Ver todas las plantillas",
+        "desc": "Catálogo completo"
+      },
+      "research_agent": {
+        "name": "Agente de revisión documental",
+        "desc": "Asistente especializado para análisis de corpus"
+      }
+    },
+    "coming_soon": "Próximamente"
+  },
+  "skill_form": {
+    "breadcrumb": {
+      "home": "Inicio",
+      "skill": "Skill",
+      "step": "Paso {n} de 8"
+    },
+    "steps": {
+      "1": "Identificación",
+      "2": "Activación",
+      "3": "Comportamiento",
+      "4": "Flujo",
+      "5": "Salida",
+      "6": "Recursos",
+      "7": "Distribución",
+      "8": "Exportación"
+    },
+    "questions": {
+      "activation": {
+        "tag": "Pregunta 1 de 3",
+        "label": "¿Cuándo debería usarse esta skill?",
+        "help": "Es la información más importante. Determina cuándo Claude activará la skill. Empieza con un disparador imperativo y describe el contexto.",
+        "placeholder": "Ej. Usa esta skill cuando el archivero solicite redactar una descripción ISAD(G) de una unidad documental simple o compuesta..."
+      }
+    },
+    "validation": {
+      "chars": "{n} caracteres",
+      "above_threshold": "por encima del umbral recomendado",
+      "below_threshold": "por debajo del umbral mínimo (200)",
+      "saved": "Guardado",
+      "chars_zero": "caracteres",
+      "chars_one": "carácter"
+    },
+    "ai_suggestion": {
+      "title": "Sugerencia de Compo",
+      "apply": "Aplicar",
+      "another": "Otra variante",
+      "dismiss": "Descartar",
+      "improve_button_aria": "Mejorar este campo con IA local",
+      "unavailable_title": "Asistencia IA no disponible aún",
+      "unavailable_body": "La asistencia IA local ya está disponible desde el builder unificado si Ollama está activo y hay un modelo seleccionado.",
+      "unavailable_no_ollama": "No se ha detectado Ollama corriendo en localhost:11434. Asegúrate de que el servicio está activo y revisa docs/INSTALAR-OLLAMA.es.md."
+    },
+    "nav": {
+      "back": "Atrás",
+      "next": "Siguiente",
+      "hint": "Pulsa Enter o usa los botones para avanzar"
+    }
+  },
+  "audit": {
+    "breadcrumb": "Auditoría",
+    "title": "Resultados de la auditoría",
+    "subtitle": "Cruzando rol, flujo, guardrails y ejemplos · {n} hallazgos",
+    "stats": {
+      "critical": "Crítico",
+      "high": "Alto",
+      "medium": "Medio",
+      "low": "Bajo"
+    },
+    "findings": {
+      "field": "Campo:",
+      "fields": "Campos:",
+      "suggestion": "Sugerencia:",
+      "apply": "Aplicar",
+      "edit": "Editar antes",
+      "dismiss": "Descartar",
+      "show_more": "Mostrar {n} hallazgos más"
+    },
+    "footer": {
+      "disclaimer": "La auditoría es un borrador de revisión. La decisión final es tuya.",
+      "review_one": "Revisar uno a uno",
+      "apply_all": "Aplicar todas las sugerencias"
+    },
+    "placeholder": "La auditoría detallada queda preparada para una fase posterior. La generación actual ya incluye controles de alcance, formato y revisión humana."
+  },
+  "models": {
+    "breadcrumb": "Modelo IA local",
+    "title": "Modelo de IA local",
+    "subtitle": "Compo usa modelos descargados en tu máquina a través de Ollama. Nada sale de tu equipo.",
+    "active": {
+      "title": "Modelo activo",
+      "desc": "Es el modelo que Compo usa para generar sugerencias y auditorías.",
+      "in_use": "En uso",
+      "change": "Cambiar",
+      "size": "Tamaño en disco: {size}",
+      "none": "No hay ningún modelo activo. Descarga o selecciona uno abajo."
+    },
+    "downloaded": {
+      "title": "Modelos descargados",
+      "desc": "Modelos disponibles en tu instalación de Ollama. Compo permite seleccionarlos, no eliminarlos.",
+      "use": "Usar",
+      "delete": "Eliminar",
+      "empty": "No tienes ningún modelo descargado todavía.",
+      "loading": "Consultando modelos descargados...",
+      "refresh": "Actualizar modelos"
+    },
+    "recommended": {
+      "title": "Modelos recomendados",
+      "desc": "Selección curada para distintos perfiles de hardware. Descarga directa desde el registro oficial de Ollama.",
+      "download": "Descargar",
+      "already": "Ya descargado",
+      "options": {
+        "light": {
+          "tagline": "Ligero",
+          "desc": "Respuestas rápidas pero menos matizadas. Para equipos con 8 GB de RAM o menos."
+        },
+        "balanced": {
+          "tagline": "Equilibrado · recomendado",
+          "desc": "El mejor compromiso entre calidad y velocidad para esta herramienta. Para equipos con 16 GB de RAM."
+        },
+        "powerful": {
+          "tagline": "Potente",
+          "desc": "Mejor calidad de auditoría y sugerencias. Para equipos con 16 GB de RAM o más."
+        },
+        "alternative": {
+          "tagline": "Alternativa",
+          "desc": "Modelo robusto y bien probado en tareas de instrucción. Para equipos con 16 GB de RAM."
+        }
+      }
+    },
+    "downloading": {
+      "title": "Descargando {model}",
+      "desc": "Esto puede tardar varios minutos según tu conexión. No cierres la ventana.",
+      "starting": "Iniciando descarga...",
+      "verifying": "Verificando manifiesto...",
+      "downloading_layer": "Descargando capa {layer}",
+      "extracting": "Extrayendo...",
+      "completed": "Modelo descargado y disponible.",
+      "error": "Error al descargar el modelo: {message}",
+      "cancel": "Cancelar",
+      "close": "Cerrar"
+    },
+    "delete_confirm": {
+      "title": "Eliminar {model}",
+      "desc": "El modelo se eliminará de tu disco. Tendrás que descargarlo de nuevo si quieres volver a usarlo.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar"
+    },
+    "footer": {
+      "info": "Los modelos se descargan desde registry.ollama.ai. Compo no aloja modelos."
+    },
+    "delete_disabled": "Compo no borra modelos locales desde la interfaz. Puedes gestionarlos manualmente con la CLI de Ollama si lo necesitas."
+  },
+  "footer": {
+    "security": "Sin telemetría · Sin servicios externos · Modo efímero activado",
+    "privacy": "Privacidad",
+    "security_link": "Seguridad",
+    "first_start": "Primer arranque",
+    "usage": "Uso",
+    "license": "Licencia"
+  },
+  "noscript": "Compo necesita JavaScript activado para funcionar. Toda la lógica corre en tu navegador, sin conexiones externas salvo a tu propio Ollama local.",
+  "accessibility": {
+    "skip": "Saltar al contenido"
+  },
+  "builder": {
+    "breadcrumb": {
+      "home": "Inicio"
+    },
+    "types": {
+      "prompt": {
+        "label": "Prompt",
+        "title": "Constructor de prompt",
+        "help": "Escribe en lenguaje natural lo que quieres conseguir. Compo convertirá esa intención en un prompt completo, reutilizable y verificable mediante Ollama local o, si no hay modelo activo, con una estructura determinista.",
+        "step": "Idea inicial · Generación asistida",
+        "badge": "Prompt"
+      },
+      "agent": {
+        "label": "Agente",
+        "title": "Agent Builder",
+        "help": "Describe qué asistente necesitas y para qué contexto. Compo construirá identidad, misión, límites, procedimiento, formato de respuesta y criterios de calidad.",
+        "step": "Idea inicial · Agent Builder asistido",
+        "badge": "Agente"
+      },
+      "skill": {
+        "label": "Skill",
+        "title": "Constructor de skill",
+        "help": "Describe la capacidad que quieres crear. Compo generará un SKILL.md completo con activación, no activación, flujo de trabajo, formato de salida, guardrails y revisión humana.",
+        "step": "Idea inicial · Skill Builder asistido",
+        "badge": "Skill"
+      }
+    },
+    "progress": {
+      "prompt_left": "1. Instrucción breve",
+      "prompt_right": "2. Prompt estructurado · 3. Revisión · 4. Exportación",
+      "agent_left": "1. Necesidad del agente",
+      "agent_right": "2. Diseño operativo · 3. Límites · 4. Exportación",
+      "skill_left": "1. Capacidad deseada",
+      "skill_right": "2. Activación · 3. Guardrails · 4. SKILL.md"
+    },
+    "fields": {
+      "title": {
+        "label": "Título interno",
+        "help": "Nombre corto para reconocer el prompt.",
+        "placeholder": "Ej. Evaluador de respuestas IA"
+      },
+      "task": {
+        "label": "Tarea principal",
+        "help": "Describe con precisión qué debe hacer el modelo.",
+        "placeholder": "Ej. Analiza una respuesta de IA y detecta errores, lagunas y mejoras."
+      },
+      "context": {
+        "label": "Contexto de uso",
+        "help": "Indica ámbito, material de entrada y situación profesional.",
+        "placeholder": "Ej. Uso en cursos para profesionales de archivos, bibliotecas y documentación."
+      },
+      "audience": {
+        "label": "Audiencia",
+        "help": "Persona o colectivo al que se dirige la salida.",
+        "placeholder": "Ej. Profesionales de la información con conocimientos intermedios de IA."
+      },
+      "output": {
+        "label": "Formato de salida",
+        "help": "Estructura esperada de la respuesta.",
+        "placeholder": "Ej. Tabla con criterio, valoración, evidencia y recomendación."
+      },
+      "constraints": {
+        "label": "Restricciones y criterios de calidad",
+        "help": "Límites, tono, fuentes, extensión, comprobaciones y advertencias.",
+        "placeholder": "Ej. No inventar fuentes. Separar hechos e inferencias. Añadir nota de fiabilidad."
+      },
+      "agent_name": {
+        "label": "Nombre del agente",
+        "help": "Denominación breve y reconocible.",
+        "placeholder": "Ej. Agente documentalista académico"
+      },
+      "purpose": {
+        "label": "Propósito",
+        "help": "Objetivo estable del agente.",
+        "placeholder": "Ej. Ayudar a analizar documentos académicos y extraer evidencias relevantes."
+      },
+      "role": {
+        "label": "Rol e identidad",
+        "help": "Perfil profesional, tono y enfoque de trabajo.",
+        "placeholder": "Ej. Actúa como documentalista sénior con criterio metodológico."
+      },
+      "tasks": {
+        "label": "Tareas principales",
+        "help": "Lista de operaciones que sí debe realizar.",
+        "placeholder": "Ej. Resumir, comparar, extraer conceptos, detectar lagunas, proponer preguntas."
+      },
+      "inputs": {
+        "label": "Entradas esperadas",
+        "help": "Tipos de información que recibirá.",
+        "placeholder": "Ej. Textos pegados, notas, transcripciones, referencias, PDFs convertidos a texto."
+      },
+      "tools": {
+        "label": "Herramientas o recursos",
+        "help": "Capacidades permitidas si el entorno las ofrece.",
+        "placeholder": "Ej. Búsqueda local, lectura de archivos, extracción de tablas, comparación de textos."
+      },
+      "limits": {
+        "label": "Límites y guardrails",
+        "help": "Qué no debe hacer el agente y cuándo debe pedir revisión humana.",
+        "placeholder": "Ej. No inventar citas. No sustituir criterio jurídico o profesional responsable."
+      },
+      "agent_output": {
+        "label": "Formato de respuesta del agente",
+        "help": "Estructura habitual de sus respuestas.",
+        "placeholder": "Ej. Diagnóstico, evidencias, propuesta, riesgos y nota de fiabilidad."
+      },
+      "skill_name": {
+        "label": "Nombre de la skill",
+        "help": "Nombre legible. El identificador técnico debe ser breve, semántico, estable, en minúsculas y con guiones.",
+        "placeholder": "Ej. Descripción archivística ISAD(G)"
+      },
+      "slug": {
+        "label": "Slug",
+        "help": "Identificador técnico seguro: breve, semántico, en minúsculas, con guiones y preferiblemente por debajo de 64 caracteres.",
+        "placeholder": "Ej. descripcion-isadg"
+      },
+      "description": {
+        "label": "Descripción de activación",
+        "help": "Descripción semántica de la capacidad. En skills debe ayudar a Claude a decidir cuándo activarla: qué hace y ante qué peticiones debe usarse.",
+        "placeholder": "Ej. Optimiza prompts para Claude reduciendo tokens sin perder significado, estructura ni calidad. Usar cuando el usuario pida acortar, compactar, depurar, comprimir o mejorar una instrucción, prompt, agente o skill."
+      },
+      "activation": {
+        "label": "Criterios de activación",
+        "help": "Disparadores naturales de uso: palabras, verbos, tareas y contextos que debería reconocer Claude para activar la skill.",
+        "placeholder": "Ej. Usa esta skill cuando el usuario solicite redactar o revisar una descripción archivística."
+      },
+      "non_activation": {
+        "label": "Criterios de no activación",
+        "help": "Casos en los que la skill no debe utilizarse.",
+        "placeholder": "Ej. No usar para certificar validez jurídica o completar datos sin evidencia."
+      },
+      "workflow": {
+        "label": "Flujo de trabajo",
+        "help": "Secuencia operativa que debe seguir el asistente.",
+        "placeholder": "Ej. 1. Identificar nivel de descripción. 2. Extraer evidencias. 3. Proponer campos. 4. Señalar dudas."
+      },
+      "skill_output": {
+        "label": "Formato de salida de la skill",
+        "help": "Cómo debe devolver resultados.",
+        "placeholder": "Ej. Tabla con campo ISAD(G), valor propuesto, evidencia, inferencia y confianza."
+      },
+      "guardrails": {
+        "label": "Guardrails",
+        "help": "Controles de seguridad, alcance y revisión humana.",
+        "placeholder": "Ej. No inventar datos. Marcar inferencias. Exigir revisión profesional."
+      },
+      "examples": {
+        "label": "Ejemplos",
+        "help": "Casos de uso, preferiblemente anonimizados.",
+        "placeholder": "Ej. Entrada: transcripción de expediente. Salida: propuesta de campos descriptivos."
+      },
+      "brief": {
+        "prompt": {
+          "label": "Describe el prompt que necesitas",
+          "help": "Escribe una instrucción natural. No hace falta separar rol, contexto, formato y restricciones: Compo lo hará por ti.",
+          "placeholder": "Ej. Necesito un prompt para analizar respuestas generadas por IA en cursos para archiveros y bibliotecarios. Debe detectar errores, alucinaciones, falta de evidencia, sesgos y mejoras concretas, con una nota de fiabilidad final."
+        },
+        "agent": {
+          "label": "Describe el agente que quieres construir",
+          "help": "Indica qué debe hacer, para quién, con qué límites y en qué contexto. Compo completará el diseño operativo.",
+          "placeholder": "Ej. Quiero un agente documentalista académico que lea textos largos, extraiga argumentos y evidencias, proponga matrices de análisis y avise cuando falten datos o haya riesgo de inventar citas."
+        },
+        "skill": {
+          "label": "Describe la skill que quieres crear",
+          "help": "Explica la capacidad que debe activar el asistente. Compo generará el SKILL.md completo y revisable.",
+          "placeholder": "Ej. Necesito una skill para descripción archivística ISAD(G). Debe trabajar con transcripciones de documentos, proponer campos descriptivos, separar evidencia literal e inferencias, estimar confianza y exigir revisión profesional."
+        }
+      }
+    },
+    "actions": {
+      "generate": "Generar",
+      "copy": "Copiar",
+      "download": "Descargar",
+      "clear": "Limpiar",
+      "back_home": "Volver",
+      "regenerate": "Regenerar",
+      "review": "Revisar",
+      "improve_instruction": "Mejorar instrucción",
+      "clear_result": "Borrar",
+      "clear_review": "Borrar revisión",
+      "clear_current": "Limpiar esta sección",
+      "clear_all": "Borrar todo",
+      "export_project": "Exportar proyecto",
+      "import_project": "Importar proyecto"
+    },
+    "nav": {
+      "hint": "La entrada principal es una instrucción breve. Ollama la convierte en un artefacto completo; sin modelo activo se genera una estructura local de respaldo."
+    },
+    "result": {
+      "title": "Resultado generado",
+      "empty": "Escribe la instrucción breve y pulsa generar.",
+      "placeholder": "El resultado aparecerá aquí. Puedes editarlo antes de copiarlo o descargarlo.",
+      "generated_with_model": "Generado con Ollama · Modelo: {model}",
+      "generated_local": "Generado en modo estructurado sin IA porque no hay modelo activo."
+    },
+    "status": {
+      "required_title": "Falta un campo obligatorio",
+      "required_body": "Completa el campo: {field}.",
+      "generating_title": "Generando",
+      "generating_body": "Compo está transformando la instrucción breve en un artefacto completo. Si Ollama está activo, se usará el modelo local seleccionado.",
+      "local_title": "Modo sin IA",
+      "local_body": "No se ha detectado un modelo activo. Se ha usado una estructura local de respaldo basada en la instrucción breve.",
+      "ollama_error_title": "Ollama no ha completado la generación",
+      "ollama_error_body": "Se entrega una versión estructurada local. Error: {message}",
+      "ollama_error_append": "Nota: Ollama no completó la generación. Se conserva una versión estructurada local. Error: {message}",
+      "done_title": "Generación completada",
+      "done_body": "Resultado generado con el modelo local {model}.",
+      "copied_title": "Copiado",
+      "copied_body": "El resultado se ha copiado al portapapeles.",
+      "pii_confirm": "El contenido parece incluir posibles datos personales o identificadores: {labels}. Revisa antes de descargar. ¿Quieres continuar?",
+      "regenerating_title": "Regenerando",
+      "improving_title": "Mejorando instrucción",
+      "improving_body": "Compo está convirtiendo la instrucción inicial en una petición más clara, específica y accionable.",
+      "improved_title": "Instrucción mejorada",
+      "improved_body_model": "La instrucción se ha mejorado con el modelo local {model}. Revísala antes de generar.",
+      "improved_body_local": "La instrucción se ha mejorado con una plantilla local no IA. Revísala antes de generar.",
+      "reviewing_title": "Revisando resultado",
+      "reviewing_body": "Compo está auditando la propuesta actual para detectar problemas, riesgos y mejoras concretas.",
+      "review_done_title": "Revisión completada",
+      "review_done_body_model": "La revisión se ha generado con el modelo local {model}.",
+      "review_done_body_local": "La revisión se ha generado en modo local no IA.",
+      "clear_all_confirm": "Esto borrará instrucciones, resultados, revisiones e historial de Prompt, Agente y Skill en esta sesión. ¿Continuar?",
+      "imported_title": "Proyecto importado",
+      "imported_body": "Se ha restaurado el proyecto local de Compo.",
+      "import_error_title": "No se pudo importar",
+      "import_error_body": "El archivo no parece ser un proyecto válido de Compo. Error: {message}",
+      "empty_model_response": "Ollama devolvió una respuesta vacía. Se usará la estructura local de respaldo; prueba con otro modelo o reduce la instrucción."
+    },
+    "advanced": {
+      "summary": "Campos avanzados opcionales",
+      "help": "No es obligatorio completarlos. Sirven para dirigir el resultado cuando necesitas más control; la instrucción breve sigue siendo la entrada principal."
+    },
+    "history": {
+      "empty": "Sin historial",
+      "current": "Versión actual",
+      "generated": "Generado",
+      "regenerated": "Regenerado"
+    },
+    "review": {
+      "title": "Revisión crítica",
+      "help": "Diagnóstico generado sobre la propuesta actual. No sustituye la revisión profesional."
+    },
+    "portable": {
+      "label": "Modo portable",
+      "help": "Genera la skill sin referencias a Claude para usarla también en otros asistentes (ChatGPT, asistentes locales, etc.)."
+    }
+  },
+  "usage": {
+    "breadcrumb": "Instrucciones de uso",
+    "title": "Instrucciones de uso",
+    "subtitle": "Guía breve para trabajar con Compo local y Ollama.",
+    "quick": {
+      "title": "Flujo recomendado",
+      "step1": "Elige Prompt, Agente o Skill desde el menú superior.",
+      "step2": "Escribe una necesidad en lenguaje natural: objetivo, destinatario, contexto y límites.",
+      "step3": "Pulsa Generar. Si Ollama está activo, Compo usará el modelo local seleccionado; si no, generará una estructura de respaldo.",
+      "step4": "Revisa el resultado. Usa Regenerar para una variante o Revisar para una auditoría crítica.",
+      "step5": "Copia, descarga o exporta el proyecto. Al terminar, pulsa Apagar para cerrar el servidor local de Compo."
+    },
+    "ollama": {
+      "title": "Ollama y modelos",
+      "body": "Compo detecta los modelos instalados en Ollama, permite elegir el modelo activo y ofrece descargas recomendadas. Por seguridad operativa, Compo no borra modelos locales desde la interfaz."
+    },
+    "first_start": {
+      "title": "Primer arranque",
+      "body": "Para instalación y primer arranque, consulta la guía breve incluida en la carpeta docs.",
+      "link": "Abrir guía de primer arranque"
+    },
+    "safety": {
+      "title": "Criterios de uso seguro",
+      "item1": "No pegues datos personales o confidenciales salvo que el contexto local sea adecuado y tengas autorización.",
+      "item2": "Revisa manualmente prompts, agentes y skills antes de usarlos en producción.",
+      "item3": "Las skills generadas deben considerarse borradores operativos: comprueba activación, límites, ejemplos y guardrails.",
+      "item4": "Ollama es un servicio independiente: apagar Compo no apaga Ollama."
+    }
+  },
+  "license": {
+    "breadcrumb": "Licencia",
+    "title": "Licencia de uso",
+    "subtitle": "Compo se distribuye como beta local bajo una licencia restrictiva de uso, no bajo MIT.",
+    "summary": "Uso permitido: evaluación, uso personal, uso profesional interno y formación no redistributiva. Queda prohibida la redistribución pública, reventa, sublicencia, publicación de versiones modificadas o eliminación de avisos de autoría sin autorización expresa y por escrito.",
+    "notice": "Esta pantalla resume la licencia incluida en el archivo LICENSE. En caso de duda, prevalece el texto completo de LICENSE.",
+    "open_file": "Abrir LICENSE"
+  }
+}

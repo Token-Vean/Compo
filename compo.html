@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es" data-loading>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' http://localhost:11434 http://127.0.0.1:11434; font-src 'self'; form-action 'none'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'">
+  <title>Compo · Prompt · Agente · Skill</title>
+
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/screens.css">
+  <link rel="icon" type="image/svg+xml" href="./assets/logo-compo.svg">
+</head>
+<body>
+
+<a class="skip-link" href="#compo-main" data-i18n="accessibility.skip">Saltar al contenido</a>
+
+<noscript>
+  <div class="noscript-warning" data-i18n="noscript">
+    Compo necesita JavaScript activado para funcionar. Toda la lógica corre en tu navegador, sin conexiones externas salvo a tu propio Ollama local.
+  </div>
+</noscript>
+
+<div id="compo-app">
+  <header class="compo-header" role="banner">
+    <button class="compo-brand" data-go-to="welcome" type="button">
+      <img class="compo-brand-mark" src="./assets/logo-compo.svg" alt="" width="36" height="36">
+      <span class="compo-brand-text">
+        <span class="compo-brand-name">Compo</span>
+        <span class="compo-brand-tagline" data-i18n="header.tagline">Prompt · Agente · Skill</span>
+      </span>
+    </button>
+
+    <nav class="compo-primary-nav" aria-label="Tipos de artefacto">
+      <button class="compo-nav-tab" type="button" data-start-builder="prompt" data-builder-tab="prompt" data-i18n="header.nav.prompt">Prompt</button>
+      <button class="compo-nav-tab" type="button" data-start-builder="agent" data-builder-tab="agent" data-i18n="header.nav.agent">Agente</button>
+      <button class="compo-nav-tab" type="button" data-start-builder="skill" data-builder-tab="skill" data-i18n="header.nav.skill">Skill</button>
+    </nav>
+
+    <div class="compo-header-actions">
+      <button id="compo-toggle-mode" class="compo-btn compo-btn-sm" data-mode="guided" type="button">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+        <span class="compo-mode-label" data-i18n="header.modes.guided">Guiado</span>
+      </button>
+      <button class="compo-btn compo-btn-sm" type="button" data-go-to="usage" data-i18n="header.usage">Uso</button>
+      <button class="compo-btn compo-btn-sm" type="button" data-go-to="license" data-i18n="header.license">Licencia</button>
+      <button id="compo-shutdown" class="compo-btn compo-btn-sm compo-btn-danger" type="button" data-i18n="header.shutdown.button" data-i18n-attr="aria-label:header.shutdown.aria">Apagar</button>
+      <button id="compo-toggle-lang" class="compo-btn compo-btn-sm" type="button" aria-label="Cambiar idioma">ES</button>
+      <button id="compo-toggle-theme" class="compo-btn compo-btn-icon-sm" type="button" aria-label="Cambiar tema"></button>
+    </div>
+  </header>
+
+  <button id="compo-ollama-status" class="compo-ollama-status inactive" type="button">
+    <span class="compo-ollama-dot" aria-hidden="true"></span>
+    <span id="compo-ollama-status-text">Comprobando Ollama...</span>
+  </button>
+
+  <main id="compo-main" role="main">
+    <section class="screen active" data-screen="welcome" aria-labelledby="welcome-title">
+      <div class="compo-welcome-hero">
+        <h1 id="welcome-title" data-i18n="welcome.title">¿Qué quieres crear hoy?</h1>
+        <p data-i18n="welcome.subtitle">Elige el tipo de artefacto. Todo se procesa en tu máquina.</p>
+      </div>
+
+      <div class="compo-welcome-grid">
+        <button class="compo-card compo-card-clickable" type="button" data-start-builder="prompt" data-card="prompt">
+          <div class="compo-card-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="compo-card-title" data-i18n="welcome.cards.prompt.title">Prompt</div>
+          <div class="compo-card-desc" data-i18n="welcome.cards.prompt.desc">Una instrucción concreta para una sola interacción.</div>
+        </button>
+
+        <button class="compo-card compo-card-clickable" type="button" data-start-builder="agent" data-card="agent">
+          <div class="compo-card-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg>
+          </div>
+          <div class="compo-card-title" data-i18n="welcome.cards.agent.title">Agente</div>
+          <div class="compo-card-desc" data-i18n="welcome.cards.agent.desc">Un asistente especializado con rol y reglas estables.</div>
+        </button>
+
+        <button class="compo-card compo-card-clickable compo-card-featured" type="button" data-start-builder="skill" data-card="skill">
+          <span class="compo-card-featured-badge" data-i18n="welcome.cards.skill.badge">Recomendado</span>
+          <div class="compo-card-icon compo-card-icon-strong" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12c.6 0 1.1.5 1.1 1.1V20a1 1 0 0 1-1 1h-6.9a1.1 1.1 0 0 1-1.1-1.1c0-1.4-1.2-2.5-2.6-2.3-1 .2-1.8 1-1.9 2 0 .8-.7 1.4-1.5 1.4H4a1 1 0 0 1-1-1v-3.8c0-.5.5-.9 1-.9 1.3 0 2.3-1.2 2-2.6-.2-.9-1-1.7-1.9-1.8-.6 0-1.1-.5-1.1-1V4a1 1 0 0 1 1-1h3.8c.5 0 .9.5.9 1 0 1.3 1.2 2.3 2.6 2C12.2 5.8 13 5 13.1 4c0-.5.5-1 1-1H20a1 1 0 0 1 1 1v3.5c0 .6-.5 1.1-1.1 1.1-1.4 0-2.5 1.2-2.2 2.6.2.9 1 1.5 1.9 1.6.5 0 1.1.5 1.1 1.1l-1.2-1z"/></svg>
+          </div>
+          <div class="compo-card-title" data-i18n="welcome.cards.skill.title">Skill</div>
+          <div class="compo-card-desc" data-i18n="welcome.cards.skill.desc">Una capacidad reutilizable para asistentes compatibles con instrucciones persistentes.</div>
+        </button>
+      </div>
+
+      <div class="compo-welcome-templates">
+        <div class="compo-welcome-templates-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="6" rx="1"/><rect x="3" y="13" width="10" height="8" rx="1"/><rect x="17" y="13" width="4" height="8" rx="1"/></svg>
+          <span data-i18n="welcome.templates.title">O empezar desde una plantilla</span>
+        </div>
+        <div class="compo-template-grid">
+          <button class="compo-template-item" type="button" data-template="verifier">
+            <div>
+              <div class="compo-template-name" data-i18n="welcome.templates.verifier.name">Verificador de calidad IA</div>
+              <div class="compo-template-desc" data-i18n="welcome.templates.verifier.desc">Audita respuestas de modelos</div>
+            </div>
+          </button>
+          <button class="compo-template-item" type="button" data-template="compressor">
+            <div>
+              <div class="compo-template-name" data-i18n="welcome.templates.compressor.name">Compresor de respuestas</div>
+              <div class="compo-template-desc" data-i18n="welcome.templates.compressor.desc">Reduce tokens preservando núcleo</div>
+            </div>
+          </button>
+          <button class="compo-template-item" type="button" data-template="isad">
+            <div>
+              <div class="compo-template-name" data-i18n="welcome.templates.isad.name">Descripción ISAD(G)</div>
+              <div class="compo-template-desc" data-i18n="welcome.templates.isad.desc">Norma archivística internacional</div>
+            </div>
+          </button>
+          <button class="compo-template-item" type="button" data-template="agent-research">
+            <div>
+              <div class="compo-template-name" data-i18n="welcome.templates.research_agent.name">Agente de revisión documental</div>
+              <div class="compo-template-desc" data-i18n="welcome.templates.research_agent.desc">Asistente especializado para análisis de corpus</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="builder" aria-labelledby="builder-title">
+      <div class="compo-screen-bar">
+        <nav class="compo-breadcrumb">
+          <button class="compo-breadcrumb-item" data-go-to="welcome" type="button" data-i18n="builder.breadcrumb.home">Inicio</button>
+          <span class="compo-breadcrumb-sep" aria-hidden="true">›</span>
+          <span id="builder-breadcrumb-current" class="compo-breadcrumb-current">—</span>
+        </nav>
+      </div>
+
+      <div class="compo-builder-header">
+        <div>
+          <div id="builder-step-tag" class="compo-form-step-tag">—</div>
+          <h2 id="builder-title" class="compo-form-question">—</h2>
+          <p id="builder-help" class="compo-form-help">—</p>
+        </div>
+        <span id="builder-mode-badge" class="compo-badge compo-badge-info">—</span>
+      </div>
+
+      <div class="compo-progress-bars" id="builder-progress" aria-hidden="false">
+        <div class="compo-progress-bars-track" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="4">
+          <div class="compo-progress-bars-segment current"></div>
+          <div class="compo-progress-bars-segment"></div>
+          <div class="compo-progress-bars-segment"></div>
+          <div class="compo-progress-bars-segment"></div>
+        </div>
+        <div class="compo-progress-bars-labels">
+          <span id="builder-progress-left">—</span>
+          <span id="builder-progress-right">—</span>
+        </div>
+      </div>
+
+      <div class="compo-builder-workspace">
+        <div class="compo-builder-input-panel">
+          <form id="builder-form" class="compo-builder-form" novalidate></form>
+
+          <div id="builder-status" class="compo-ai-suggestion muted" hidden>
+            <div class="compo-ai-suggestion-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--compo-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3L12 3z"/></svg>
+              <span id="builder-status-title" class="compo-ai-suggestion-title">—</span>
+              <span id="builder-status-meta" class="compo-ai-suggestion-meta"></span>
+            </div>
+            <p id="builder-status-body" class="compo-ai-suggestion-body"></p>
+          </div>
+
+          <section id="builder-review-panel" class="compo-review-panel" aria-labelledby="builder-review-title" hidden>
+            <div class="compo-review-header">
+              <div>
+                <h3 id="builder-review-title" data-i18n="builder.review.title">Revisión crítica</h3>
+                <p data-i18n="builder.review.help">Diagnóstico generado sobre la propuesta actual. No sustituye la revisión profesional.</p>
+              </div>
+              <button id="builder-clear-review" class="compo-btn compo-btn-sm" type="button" data-builder-action="clear-review" data-i18n="builder.actions.clear_review">Borrar revisión</button>
+            </div>
+            <textarea id="builder-review-output" class="compo-textarea compo-review-textarea" rows="8" spellcheck="false" readonly></textarea>
+          </section>
+        </div>
+
+        <section class="compo-result-panel" aria-labelledby="builder-result-title">
+          <div class="compo-result-header">
+            <div>
+              <h3 id="builder-result-title" data-i18n="builder.result.title">Resultado generado</h3>
+              <p id="builder-result-meta" data-i18n="builder.result.empty">Completa los campos y pulsa generar.</p>
+            </div>
+            <div class="compo-result-actions">
+              <select id="builder-history" class="compo-select compo-history-select" disabled aria-label="Historial de versiones">
+                <option value="" data-i18n="builder.history.empty">Sin historial</option>
+              </select>
+              <button id="builder-regenerate" class="compo-btn compo-btn-sm" type="button" disabled data-builder-action="regenerate" data-i18n="builder.actions.regenerate">Regenerar</button>
+              <button id="builder-review" class="compo-btn compo-btn-sm" type="button" disabled data-builder-action="review" data-i18n="builder.actions.review">Revisar</button>
+              <button id="builder-clear-result" class="compo-btn compo-btn-sm compo-btn-danger" type="button" disabled data-builder-action="clear-result" data-i18n="builder.actions.clear_result">Borrar</button>
+              <button id="builder-copy" class="compo-btn compo-btn-sm" type="button" disabled data-builder-action="copy" data-i18n="builder.actions.copy">Copiar</button>
+              <button id="builder-download" class="compo-btn compo-btn-sm" type="button" disabled data-builder-action="download" data-i18n="builder.actions.download">Descargar</button>
+            </div>
+          </div>
+          <textarea id="builder-output" class="compo-textarea compo-output-textarea" rows="14" spellcheck="false" data-i18n-attr="placeholder:builder.result.placeholder"></textarea>
+        </section>
+      </div>
+
+      <div class="compo-form-nav">
+        <button class="compo-btn" type="button" data-go-to="welcome">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          <span data-i18n="builder.actions.back_home">Volver</span>
+        </button>
+        <span class="compo-form-nav-hint" data-i18n="builder.nav.hint">La generación usa Ollama si hay modelo activo; si no, crea una versión estructurada sin IA.</span>
+        <div class="compo-form-nav-actions">
+          <button class="compo-btn" type="button" data-builder-action="export-project" data-i18n="builder.actions.export_project">Exportar proyecto</button>
+          <button class="compo-btn" type="button" data-builder-action="import-project" data-i18n="builder.actions.import_project">Importar proyecto</button>
+          <input id="builder-import-file" class="sr-only" type="file" accept="application/json,.json">
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="audit" aria-labelledby="audit-title">
+      <div class="compo-screen-bar">
+        <nav class="compo-breadcrumb">
+          <button class="compo-breadcrumb-item" data-go-to="welcome" type="button" data-i18n="builder.breadcrumb.home">Inicio</button>
+          <span class="compo-breadcrumb-sep" aria-hidden="true">›</span>
+          <span class="compo-breadcrumb-current" data-i18n="audit.breadcrumb">Auditoría</span>
+        </nav>
+      </div>
+      <div class="compo-audit-header">
+        <div class="compo-audit-header-row">
+          <div>
+            <h2 id="audit-title" data-i18n="audit.title">Resultados de la auditoría</h2>
+            <p data-i18n="audit.placeholder">La auditoría detallada queda preparada para una fase posterior. La generación actual ya incluye controles de alcance, formato y revisión humana.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="models" aria-labelledby="models-title">
+      <div class="compo-screen-bar">
+        <nav class="compo-breadcrumb">
+          <button class="compo-breadcrumb-item" data-go-to="welcome" type="button" data-i18n="builder.breadcrumb.home">Inicio</button>
+          <span class="compo-breadcrumb-sep" aria-hidden="true">›</span>
+          <span class="compo-breadcrumb-current" data-i18n="models.breadcrumb">Modelo IA local</span>
+        </nav>
+      </div>
+
+      <div class="compo-models-section">
+        <h2 id="models-title" class="compo-models-section-title" data-i18n="models.title">Modelo de IA local</h2>
+        <p class="compo-models-section-desc" data-i18n="models.subtitle">Compo usa modelos descargados en tu máquina a través de Ollama. Nada sale de tu equipo.</p>
+      </div>
+
+      <div class="compo-models-section">
+        <h3 class="compo-models-section-title compo-models-section-title-sm" data-i18n="models.active.title">Modelo activo</h3>
+        <p class="compo-models-section-desc" data-i18n="models.active.desc">Es el modelo que Compo usa para generar sugerencias y auditorías.</p>
+        <div id="compo-active-model-card" class="compo-model-card active"></div>
+      </div>
+
+      <div class="compo-models-section">
+        <div class="compo-models-section-heading">
+          <div>
+            <h3 class="compo-models-section-title compo-models-section-title-sm" data-i18n="models.downloaded.title">Modelos descargados</h3>
+            <p class="compo-models-section-desc" data-i18n="models.downloaded.desc">Modelos disponibles en tu instalación de Ollama.</p>
+          </div>
+          <button id="compo-refresh-models" class="compo-btn compo-btn-sm" type="button" data-i18n="models.downloaded.refresh">Actualizar modelos</button>
+        </div>
+        <div id="compo-downloaded-list"></div>
+      </div>
+
+      <div class="compo-models-section">
+        <h3 class="compo-models-section-title compo-models-section-title-sm" data-i18n="models.recommended.title">Modelos recomendados</h3>
+        <p class="compo-models-section-desc" data-i18n="models.recommended.desc">Selección curada para distintos perfiles de hardware. Descarga directa desde el registro oficial de Ollama.</p>
+        <div id="compo-recommended-list"></div>
+        <p class="compo-models-section-desc compo-models-footer-info">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span data-i18n="models.footer.info">Los modelos se descargan desde registry.ollama.ai. Compo no aloja modelos.</span>
+        </p>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="usage" aria-labelledby="usage-title">
+      <div class="compo-screen-bar">
+        <nav class="compo-breadcrumb">
+          <button class="compo-breadcrumb-item" data-go-to="welcome" type="button" data-i18n="builder.breadcrumb.home">Inicio</button>
+          <span class="compo-breadcrumb-sep" aria-hidden="true">›</span>
+          <span class="compo-breadcrumb-current" data-i18n="usage.breadcrumb">Instrucciones de uso</span>
+        </nav>
+      </div>
+
+      <div class="compo-models-section compo-doc-section">
+        <h2 id="usage-title" class="compo-models-section-title" data-i18n="usage.title">Instrucciones de uso</h2>
+        <p class="compo-models-section-desc" data-i18n="usage.subtitle">Guía breve para trabajar con Compo local y Ollama.</p>
+      </div>
+
+      <div class="compo-models-section compo-doc-section">
+        <h3 class="compo-models-section-title compo-models-section-title-sm" data-i18n="usage.quick.title">Flujo recomendado</h3>
+        <ol class="compo-doc-list">
+          <li data-i18n="usage.quick.step1">Elige Prompt, Agente o Skill desde el menú superior.</li>
+          <li data-i18n="usage.quick.step2">Escribe una necesidad en lenguaje natural: objetivo, destinatario, contexto y límites.</li>
+          <li data-i18n="usage.quick.step3">Pulsa Generar. Si Ollama está activo, Compo usará el modelo local seleccionado; si no, generará una estructura de respaldo.</li>
+          <li data-i18n="usage.quick.step4">Revisa el resultado. Usa Regenerar para una variante o Revisar para una auditoría crítica.</li>
+          <li data-i18n="usage.quick.step5">Copia, descarga o exporta el proyecto. Al terminar, pulsa Apagar para cerrar el servidor local de Compo.</li>
+        </ol>
+      </div>
+
+      <div class="compo-models-section compo-doc-section">
+        <h3 class="compo-models-section-title compo-models-section-title-sm" data-i18n="usage.ollama.title">Ollama y modelos</h3>
+        <p class="compo-models-section-desc" data-i18n="usage.ollama.body">Compo detecta los modelos instalados en Ollama, permite elegir el modelo activo y ofrece descargas recomendadas. Por seguridad operativa, Compo no borra modelos locales desde la interfaz.</p>
+      </div>
+
+      <div class="compo-models-section compo-doc-section">
+        <h3 class="compo-models-section-title compo-models-section-title-sm" data-i18n="usage.first_start.title">Primer arranque</h3>
+        <p class="compo-models-section-desc"><span data-i18n="usage.first_start.body">Para instalación y primer arranque, consulta la guía breve incluida en la carpeta docs.</span> <a href="./docs/PRIMER-ARRANQUE.es.md" data-i18n="usage.first_start.link">Abrir guía de primer arranque</a>.</p>
+      </div>
+
+      <div class="compo-models-section compo-doc-section">
+        <h3 class="compo-models-section-title compo-models-section-title-sm" data-i18n="usage.safety.title">Criterios de uso seguro</h3>
+        <ul class="compo-doc-list">
+          <li data-i18n="usage.safety.item1">No pegues datos personales o confidenciales salvo que el contexto local sea adecuado y tengas autorización.</li>
+          <li data-i18n="usage.safety.item2">Revisa manualmente prompts, agentes y skills antes de usarlos en producción.</li>
+          <li data-i18n="usage.safety.item3">Las skills generadas deben considerarse borradores operativos: comprueba activación, límites, ejemplos y guardrails.</li>
+          <li data-i18n="usage.safety.item4">Ollama es un servicio independiente: apagar Compo no apaga Ollama.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="license" aria-labelledby="license-title">
+      <div class="compo-screen-bar">
+        <nav class="compo-breadcrumb">
+          <button class="compo-breadcrumb-item" data-go-to="welcome" type="button" data-i18n="builder.breadcrumb.home">Inicio</button>
+          <span class="compo-breadcrumb-sep" aria-hidden="true">›</span>
+          <span class="compo-breadcrumb-current" data-i18n="license.breadcrumb">Licencia</span>
+        </nav>
+      </div>
+
+      <div class="compo-models-section compo-doc-section">
+        <h2 id="license-title" class="compo-models-section-title" data-i18n="license.title">Licencia de uso</h2>
+        <p class="compo-models-section-desc" data-i18n="license.subtitle">Compo se distribuye como beta local bajo una licencia restrictiva de uso, no bajo MIT.</p>
+      </div>
+
+      <div class="compo-models-section compo-doc-section">
+        <div class="compo-license-card">
+          <h3 class="compo-models-section-title compo-models-section-title-sm">Compo Local Beta License v0.1</h3>
+          <p><strong>© 2026 Víctor Villapalos Pardiñas.</strong> <a href="https://www.victorvillapalos.es" rel="noopener noreferrer">www.victorvillapalos.es</a></p>
+          <p data-i18n="license.summary">Uso permitido: evaluación, uso personal, uso profesional interno y formación no redistributiva. Queda prohibida la redistribución pública, reventa, sublicencia, publicación de versiones modificadas o eliminación de avisos de autoría sin autorización expresa y por escrito.</p>
+          <p data-i18n="license.notice">Esta pantalla resume la licencia incluida en el archivo LICENSE. En caso de duda, prevalece el texto completo de LICENSE.</p>
+          <a class="compo-btn compo-btn-primary" href="./LICENSE" data-i18n="license.open_file">Abrir LICENSE</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="compo-footer" role="contentinfo">
+    <span class="compo-footer-info">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      <span data-i18n="footer.security">Sin telemetría · Sin servicios externos · Modo efímero activado</span>
+    </span>
+    <span class="compo-footer-links">
+      <a href="./docs/PRIMER-ARRANQUE.es.md" data-i18n="footer.first_start">Primer arranque</a>
+      <button class="compo-footer-link-button" type="button" data-go-to="usage" data-i18n="footer.usage">Uso</button>
+      <button class="compo-footer-link-button" type="button" data-go-to="license" data-i18n="footer.license">Licencia</button>
+      <a href="./docs/PRIVACIDAD.es.md" data-i18n="footer.privacy">Privacidad</a>
+      <a href="./docs/SEGURIDAD.es.md" data-i18n="footer.security_link">Seguridad</a>
+    </span>
+  </footer>
+</div>
+
+<div id="compo-download-modal" class="compo-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="compo-download-title">
+  <div class="compo-modal">
+    <h3 id="compo-download-title" class="compo-modal-title">—</h3>
+    <p id="compo-download-desc" class="compo-modal-desc">—</p>
+    <div class="compo-modal-progress-wrap">
+      <div id="compo-download-status" class="compo-modal-progress-status">—</div>
+      <div class="compo-progress"><div id="compo-download-bar" class="compo-progress-bar"></div></div>
+      <div id="compo-download-meta" class="compo-progress-meta"></div>
+    </div>
+    <div class="compo-modal-actions">
+      <button id="compo-download-cancel" class="compo-btn" type="button">Cancelar</button>
+      <button id="compo-download-close" class="compo-btn compo-btn-primary" type="button" hidden>Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="compo-confirm-modal" class="compo-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="compo-confirm-title">
+  <div class="compo-modal">
+    <h3 id="compo-confirm-title" class="compo-modal-title">—</h3>
+    <p id="compo-confirm-desc" class="compo-modal-desc">—</p>
+    <div class="compo-modal-actions">
+      <button id="compo-confirm-cancel" class="compo-btn" type="button">Cancelar</button>
+      <button id="compo-confirm-action" class="compo-btn compo-btn-primary" type="button">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<script src="./js/security.js"></script>
+<script src="./js/theme.js"></script>
+<script src="./js/i18n.js"></script>
+<script src="./js/router.js"></script>
+<script src="./js/ollama.js"></script>
+<script src="./js/compo.js"></script>
+
+</body>
+</html>
