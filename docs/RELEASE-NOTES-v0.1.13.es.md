@@ -15,6 +15,8 @@ Compo v0.1.13 es una beta local para crear prompts, agentes y skills con asisten
 - Documentación de primer arranque actualizada.
 - Licencia beta restrictiva y aviso source-available.
 - Mejor empaquetado para GitHub y release.
+- Modelos recomendados actualizados para Ollama: `gemma4:e2b`, `gemma4:e4b`, `gpt-oss:20b` y `qwen3:8b`.
+- Frontmatter YAML de `SKILL.md` más robusto: normalización defensiva, metadatos de portabilidad, dominio, idioma y revisión humana.
 
 ## Instalación rápida en Windows
 

@@ -38,6 +38,233 @@
       .trim();
   }
 
+
+  function yamlQuoted(str) {
+    return `"${yamlSingleLine(str).replace(/\\/g, '\\\\')}"`;
+  }
+
+  function yamlList(key, values) {
+    const clean = (Array.isArray(values) ? values : [])
+      .map(v => yamlSingleLine(v))
+      .filter(Boolean)
+      .slice(0, 6);
+    if (!clean.length) return '';
+    return `${key}:\n` + clean.map(v => `  - ${yamlQuoted(v)}`).join('\n');
+  }
+
+  function normalizeYamlScalar(value) {
+    return String(value || '')
+      .trim()
+      .replace(/^['"]|['"]$/g, '')
+      .replace(/\\"/g, '"')
+      .replace(/\\'/g, "'")
+      .trim();
+  }
+
+  function skillNameFromText(str, fallback) {
+    const slug = keywordSlugFromText(str || '', fallback || 'skill-especializada')
+      .slice(0, 64)
+      .replace(/-+$/g, '');
+    return /^[a-z0-9][a-z0-9-]{2,63}$/.test(slug) ? slug : 'skill-especializada';
+  }
+
+  function extractFrontmatter(markdown) {
+    const text = CompoSecurity.stripControlChars(markdown || '').trim();
+    const match = text.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
+    if (!match) return null;
+    return { raw: match[1] || '', body: (match[2] || '').trim() };
+  }
+
+  function parseFrontmatter(raw) {
+    const meta = {};
+    const lines = String(raw || '').split(/\r?\n/);
+    let currentListKey = null;
+    lines.forEach(line => {
+      const listItem = line.match(/^\s*-\s*(.+?)\s*$/);
+      if (currentListKey && listItem) {
+        meta[currentListKey].push(normalizeYamlScalar(listItem[1]));
+        return;
+      }
+      currentListKey = null;
+      const m = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+      if (!m) return;
+      const key = m[1];
+      const value = m[2].trim();
+      if (!value) {
+        meta[key] = [];
+        currentListKey = key;
+      } else {
+        meta[key] = normalizeYamlScalar(value);
+      }
+    });
+    return meta;
+  }
+
+  function extractSection(markdown, heading) {
+    const esc = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(?:^|\\n)##\\s+${esc}\\s*\\n([\\s\\S]*?)(?=\\n##\\s+|\\s*$)`, 'i');
+    const m = String(markdown || '').match(re);
+    return m ? safeText(m[1]) : '';
+  }
+
+  function hasRiskySkillDescriptionLanguage(str) {
+    return /(asegura(?:ndo)?\s+que\s+cumpl|garantiz|certific|valida(?:r|ción)?\s+(?:el\s+)?cumplimiento|valida(?:r|ción)?\s+(?:la\s+)?conformidad|asegura(?:r)?\s+conformidad|cumple\s+con\s+los\s+principios|validar\s+las\s+descripciones|validates?\s+compliance|certif(?:y|ies)|guarantees?)/i.test(String(str || ''));
+  }
+
+  function isGenericSkillDescription(str) {
+    return !safeText(str) || /^(esta\s+habilidad\s+est[áa]\s+diseñada\s+para|esta\s+skill\s+sirve\s+para|ayuda\s+con\s+una\s+tarea|skill\s+generada|generada\s+con\s+compo|this\s+skill\s+is\s+designed\s+to|generated\s+with\s+compo)/i.test(String(str || '').trim());
+  }
+
+  function canonicalSkillDescriptionForSource(source) {
+    const normalized = normalizeForMatch(source || '');
+    if (/(isadg|isad\s*g|descripcion archivistica|descripciones archivisticas)/.test(normalized)) {
+      return 'Revisa borradores de descripción archivística conforme a ISAD(G), separando evidencia literal, inferencias, lagunas, nivel de confianza y recomendaciones de mejora.';
+    }
+    if (/(anonimiz|seudonimiz|pseudonimiz|proteccion de datos|reidentificacion|datos personales)/.test(normalized)) {
+      return 'Revisa propuestas de anonimización, seudonimización o enmascaramiento documental, identificando datos personales visibles, riesgos de reidentificación, lagunas y recomendaciones prudentes.';
+    }
+    if (/(gobernanza|etica|riesgo|politica|protocolo|inteligencia artificial|\bia\b)/.test(normalized)) {
+      return 'Revisa documentos de gobernanza de inteligencia artificial, detectando cobertura, lagunas, riesgos, evidencias textuales y recomendaciones para validación humana.';
+    }
+    if (/(prompt|prompts|system prompt|instruccion|instrucciones|tokens|token|optimiza|optimizar|comprim|compact)/.test(normalized)) {
+      return 'Optimiza prompts, instrucciones, agentes o skills, reduciendo ambigüedad y consumo innecesario sin perder estructura, contexto ni criterios de calidad.';
+    }
+    return '';
+  }
+
+  function softenSkillDescription(str) {
+    let out = firstSentence(str, 360);
+    out = out
+      .replace(/asegurando\s+que\s+cumplen\s+con\s+los\s+principios\s+y\s+estructura\s+recomendados?\s+por/gi, 'ayudando a comprobar su adecuación preliminar a')
+      .replace(/asegurando\s+que\s+cumplen/gi, 'ayudando a revisar si contemplan')
+      .replace(/garantiza(?:r|ndo)?/gi, 'ayuda a revisar')
+      .replace(/certifica(?:r|ndo)?/gi, 'produce una revisión preliminar sobre')
+      .replace(/validar\s+cumplimiento/gi, 'señalar posibles lagunas')
+      .replace(/validar\s+conformidad/gi, 'señalar posibles incoherencias')
+      .replace(/validar\s+las\s+descripciones/gi, 'revisar las descripciones')
+      .replace(/cumplen\s+con\s+los\s+principios/gi, 'contemplan los principios');
+    return out.trim();
+  }
+
+  function skillDescriptionFromBody(body, fallback) {
+    const purpose = extractSection(body, 'Propósito') || extractSection(body, 'Purpose');
+    const candidate = purpose || String(body || '').replace(/^#\s+.+$/m, '').trim();
+    const mergedSource = [fallback, body, candidate].filter(Boolean).join('\n');
+    let desc = firstSentence(candidate, 360);
+    if (!desc || isGenericSkillDescription(desc) || hasRiskySkillDescriptionLanguage(desc) || /revisar y completar/i.test(desc)) {
+      desc = canonicalSkillDescriptionForSource(mergedSource) || firstSentence(fallback || 'Ejecuta una capacidad especializada con procedimiento, límites y revisión humana.', 360);
+    }
+    desc = softenSkillDescription(desc);
+    if (!desc || isGenericSkillDescription(desc)) {
+      desc = canonicalSkillDescriptionForSource(mergedSource) || 'Ejecuta una capacidad especializada con procedimiento claro, límites explícitos, formato de salida revisable y revisión humana cuando proceda.';
+    }
+    return desc;
+  }
+
+  function whenToUseItems(whenText, activationText, descriptionText) {
+    const source = safeText(whenText) || safeText(activationText) || safeText(descriptionText);
+    if (!source) return [];
+    const explicitItems = source
+      .split(/\r?\n/)
+      .map(line => line.replace(/^\s*[-*•]\s*/, '').trim())
+      .filter(Boolean);
+    if (explicitItems.length > 1) return explicitItems.slice(0, 5);
+    const split = source.split(/(?<=[.!?])\s+|;\s+/).map(s => s.trim()).filter(Boolean);
+    return split.slice(0, 3);
+  }
+
+  function inferSkillDomain(text) {
+    const normalized = normalizeForMatch(text || '');
+    if (/(isadg|isad\s*g|descripcion archivistica|archivo|archivistica|fondo|serie documental)/.test(normalized)) return 'archivistica';
+    if (/(anonimiz|seudonimiz|pseudonimiz|proteccion de datos|reidentificacion|datos personales)/.test(normalized)) return 'privacidad';
+    if (/(gobernanza|etica|riesgo|politica|protocolo|inteligencia artificial|\bia\b)/.test(normalized)) return 'gobernanza-ia';
+    if (/(biblioteca|documentacion|centro de documentacion|metadatos|catalogacion)/.test(normalized)) return 'documentacion';
+    if (/(prompt|agente|skill|instruccion|llm|modelo)/.test(normalized)) return 'prompt-engineering';
+    return 'general';
+  }
+
+  function ensureTechnicalLimitations(body) {
+    const text = String(body || '').trim();
+    if (/^##\s+Limitaciones técnicas\s*$/im.test(text) || /^##\s+Technical limitations\s*$/im.test(text)) return text;
+    const heading = CompoI18n.current === 'en' ? '## Technical limitations' : '## Limitaciones técnicas';
+    const message = CompoI18n.current === 'en'
+      ? 'This skill operates as a textual instruction. It does not run OCR, scripts, API calls, official validations, database queries or automatic file processing unless the execution environment provides those capabilities independently.'
+      : 'Esta skill opera como instrucción textual. No ejecuta OCR, scripts, llamadas API, validaciones oficiales, consultas a bases de datos ni procesamiento automático de archivos salvo que el entorno de ejecución proporcione esas capacidades de forma independiente.';
+    const reviewRe = /\n##\s+(Revisión humana|Human review)\s*\n/i;
+    if (reviewRe.test(text)) {
+      return text.replace(reviewRe, `\n${heading}\n${message}\n\n$&`);
+    }
+    return `${text}\n\n${heading}\n${message}`.trim();
+  }
+
+  function buildSkillFrontmatter(meta, body, fallbackText) {
+    const source = [fallbackText, body, meta.description, meta.when_to_use].flat().filter(Boolean).join('\n');
+    const h1 = String(body || '').match(/^#\s+(.+)$/m);
+    const name = skillNameFromText(meta.name || (h1 && h1[1]) || source, 'skill-especializada');
+    const description = skillDescriptionFromBody(body, meta.description || fallbackText);
+    const whenItems = Array.isArray(meta.when_to_use)
+      ? meta.when_to_use
+      : whenToUseItems(meta.when_to_use, extractSection(body, 'Cuándo usar esta skill') || extractSection(body, 'When to use this skill'), description);
+    const compatibility = Array.isArray(meta.compatibility) && meta.compatibility.length
+      ? meta.compatibility
+      : (CompoI18n.current === 'en' ? ['Claude', 'ChatGPT', 'local assistants with Ollama'] : ['Claude', 'ChatGPT', 'asistentes locales con Ollama']);
+    const domain = /^[a-z0-9][a-z0-9-]{1,63}$/.test(String(meta.domain || '')) ? meta.domain : inferSkillDomain(source);
+    const language = /^(es|en|fr|it|pt|de|ca|eu|gl)$/i.test(String(meta.language || '')) ? String(meta.language).toLowerCase() : (CompoI18n.current === 'en' ? 'en' : 'es');
+    const version = /^\d+\.\d+\.\d+$/.test(String(meta.version || '')) ? meta.version : '0.1.0';
+    // La fecha no se acepta del modelo. Se impone siempre desde Compo para evitar
+    // fechas alucinadas o heredadas de ejemplos generados por el LLM.
+    const created = nowStamp();
+    const requiresReview = String(meta.requires_human_review || '').toLowerCase() === 'false' ? 'false' : 'true';
+    return [
+      '---',
+      `name: ${name}`,
+      `description: ${yamlQuoted(description)}`,
+      yamlList('when_to_use', whenItems),
+      yamlList('compatibility', compatibility),
+      `domain: ${domain}`,
+      `language: ${language}`,
+      `version: ${version}`,
+      `created: ${created}`,
+      `requires_human_review: ${requiresReview}`,
+      '---'
+    ].filter(Boolean).join('\n');
+  }
+
+  function normalizeSkillMarkdown(markdown) {
+    let text = CompoSecurity.stripControlChars(markdown || '').trim();
+    text = text.replace(/^```(?:markdown|md|yaml)?\s*/i, '').replace(/\s*```$/g, '').trim();
+    const firstFence = text.indexOf('---');
+    if (firstFence > 0) text = text.slice(firstFence).trim();
+    const fm = extractFrontmatter(text);
+    let meta = {};
+    let body = text;
+    if (fm) {
+      meta = parseFrontmatter(fm.raw);
+      body = fm.body;
+    }
+    body = body.replace(/^```(?:markdown|md)?\s*/i, '').replace(/\s*```$/g, '').trim();
+    if (!/^#\s+/m.test(body)) {
+      const inferredTitle = capitalizeSentence((meta.name || skillNameFromText(body, 'skill-especializada')).replace(/-/g, ' '));
+      body = `# ${inferredTitle}\n\n${body}`.trim();
+    }
+    body = ensureTechnicalLimitations(body);
+    const frontmatter = buildSkillFrontmatter(meta, body, text);
+    return `${frontmatter}\n\n${body}`.trim();
+  }
+
+  function validateSkillFrontmatter(markdown) {
+    const fm = extractFrontmatter(markdown);
+    const errors = [];
+    if (!fm) return { valid: false, errors: ['missing-frontmatter'], meta: {} };
+    const meta = parseFrontmatter(fm.raw);
+    if (!/^[a-z0-9][a-z0-9-]{2,63}$/.test(String(meta.name || ''))) errors.push('invalid-name');
+    if (!safeText(meta.description) || /skill generada|generada con compo|ayuda con una tarea/i.test(String(meta.description)) || hasRiskySkillDescriptionLanguage(meta.description)) errors.push('invalid-description');
+    if (!/^\d+\.\d+\.\d+$/.test(String(meta.version || ''))) errors.push('invalid-version');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(meta.created || ''))) errors.push('invalid-created');
+    if (/^\s*(api[_-]?key|token|secret|password|passwd|credential|private[_-]?key)\s*:/im.test(fm.raw)) errors.push('forbidden-sensitive-metadata');
+    return { valid: errors.length === 0, errors, meta };
+  }
+
   function firstSentence(str, maxLen) {
     const clean = safeText(str).replace(/\s+/g, ' ');
     if (!clean) return '';
@@ -242,7 +469,7 @@ Aspectos no determinables con la información disponible y cuestiones que requie
       return {
         slug: 'revisor-descripciones-archivisticas-isadg',
         title: 'Revisor de descripciones archivísticas ISAD(G)',
-        description: 'Revisa, normaliza y mejora descripciones archivísticas conforme a ISAD(G). Usar cuando el usuario pida comprobar, corregir, depurar, validar o mejorar una descripción de un fondo, serie, expediente, colección o unidad documental, especialmente si necesita detectar campos incompletos, inferencias no justificadas o problemas de productor, fechas, alcance, contenido, acceso o notas.',
+        description: 'Revisa borradores de descripción archivística conforme a ISAD(G), separando evidencia literal, inferencias, lagunas, nivel de confianza y recomendaciones de mejora. Usar cuando el usuario pida comprobar, corregir, depurar o mejorar una descripción de un fondo, serie, expediente, colección o unidad documental, especialmente si necesita detectar campos incompletos, inferencias no justificadas o problemas de productor, fechas, alcance, contenido, acceso o notas.',
         purpose: 'Ayudar a revisar descripciones archivísticas elaboradas conforme a ISAD(G), identificando problemas de completitud, coherencia, evidencia, formulación archivística y adecuación profesional. La skill proporciona una revisión estructurada para apoyar la mejora de la descripción, sin sustituir el criterio de la persona archivera responsable.',
         activation: '- Revisar una descripción archivística conforme a ISAD(G).\n- Mejorar o normalizar la redacción de una descripción de fondo, serie, expediente, colección o unidad documental.\n- Comprobar si los campos ISAD(G) están completos, son coherentes y están suficientemente justificados.\n- Detectar inferencias no justificadas sobre productor, fechas, alcance y contenido, condiciones de acceso o notas.\n- Preparar una descripción para revisión antes de incorporarla a AtoM, ArchivesSpace u otro sistema descriptivo.',
         nonActivation: '- No usar para certificar validez jurídica, autenticidad documental o suficiencia normativa.\n- No usar para inventar fechas, productores, procedencias, títulos o contenidos no aportados.\n- No usar si la tarea principal es OCR, transcripción, traducción o catalogación bibliográfica.\n- No usar para publicar directamente una descripción sin revisión profesional.',
@@ -335,8 +562,16 @@ Aspectos no determinables con la información disponible y cuestiones que requie
       .replace(/base de datos/gi, 'registro controlado')
       .replace(/solo analiza texto plano; no procesa PDFs, imágenes ni realiza OCR\.?/gi, 'Trabaja sobre el contenido textual aportado o extraído en la conversación; no realiza OCR ni extracción técnica propia.')
       .replace(/La skill requiere que el documento esté en texto plano; no procesa PDFs, imágenes ni formatos binarios\.?/gi, 'La skill trabaja sobre el contenido textual aportado o extraído en la conversación; no procesa archivos binarios ni realiza OCR por sí misma.');
+
+    // Normaliza y repara defensivamente el frontmatter. Esto evita que un modelo local
+    // entregue SKILL.md con YAML incompleto, texto antes del frontmatter, campos sensibles
+    // o metadata demasiado genérica.
+    out = normalizeSkillMarkdown(out);
+    const validation = validateSkillFrontmatter(out);
+    if (!validation.valid) out = normalizeSkillMarkdown(out);
     return out.trim();
   }
+
 
   function inferTitle(str) {
     const cleaned = safeText(str)
@@ -914,7 +1149,7 @@ Aspectos no determinables con la información disponible y cuestiones que requie
       ];
       if (mode === 'review') base.push('Audita el artefacto con criterios operativos: completitud, precisión, sobregeneralización, activación excesiva, seguridad, privacidad, formato, verificabilidad y utilidad real. No reescribas todo salvo que sea necesario; prioriza hallazgos y mejoras concretas.');
       if (mode === 'improve') base.push('Mejora una instrucción breve del usuario. Devuelve solo la instrucción mejorada, más clara, específica y accionable. No generes todavía el artefacto final.');
-      if (type === 'skill') base.push('Para skills, entrega un SKILL.md completo, reutilizable y activable: frontmatter YAML con name breve semántico, description específica orientada a discovery y when_to_use si aporta activabilidad; cuerpo con propósito, cuándo usar, cuándo no usar, entradas, flujo, formato, calidad, guardrails, limitaciones técnicas, ejemplos y revisión humana cuando proceda. No uses metadata genérica, no pidas credenciales, no incluyas procedencia de Compo, no prometas capacidades técnicas no implementadas, no introduzcas límites arbitrarios y, si la skill evalúa o audita, exige evidencia textual y estados prudentes en lugar de cumple/no cumple.');
+      if (type === 'skill') base.push('Para skills, entrega exclusivamente un SKILL.md completo, reutilizable y activable. El frontmatter YAML debe empezar en la primera línea, contener name, description, when_to_use como lista cuando proceda, compatibility, domain, language, version, created y requires_human_review, y no incluir campos sensibles como API keys, tokens, secretos o credenciales. El cuerpo debe incluir propósito, cuándo usar, cuándo no usar, entradas, flujo, formato, calidad, guardrails, limitaciones técnicas, ejemplos y revisión humana cuando proceda. No uses metadata genérica, no incluyas procedencia de Compo, no prometas capacidades técnicas no implementadas, no introduzcas límites arbitrarios y, si la skill evalúa o audita, exige evidencia textual y estados prudentes en lugar de cumple/no cumple.');
       if (type === 'agent') base.push('Para agentes, incluye identidad, misión, usuarios objetivo, entradas, procedimiento operativo, herramientas opcionales, memoria/contexto, límites, formato de respuesta, criterios de calidad y protocolo de escalado o revisión humana.');
       if (type === 'prompt') base.push('Para prompts, entrega una instrucción directamente utilizable, con rol, contexto, tarea, pasos, restricciones, formato de salida, criterios de verificación y nota de fiabilidad cuando proceda.');
       return this.loadPromptTemplate('system', base.join('\n'));
@@ -1157,7 +1392,7 @@ Aspectos no determinables con la información disponible y cuestiones que requie
     localSkillDraft(data) {
       const profile = skillProfileFallback(data);
       const rawName = safeText(data.name) || profile.title || inferTitle(data.brief) || 'Skill especializada';
-      const slug = slugify(data.slug || profile.slug || rawName).slice(0, 64).replace(/-+$/g, '') || 'skill-especializada';
+      const slug = skillNameFromText(data.slug || profile.slug || rawName, 'skill-especializada');
       const readable = rawName.charAt(0).toUpperCase() + rawName.slice(1);
       const description = skillDescriptionFallback(data);
       const activation = safeText(data.activation) || profile.activation;
@@ -1167,14 +1402,7 @@ Aspectos no determinables con la información disponible y cuestiones que requie
       const output = safeText(data.output) || profile.output;
       const guardrails = safeText(data.guardrails) || profile.guardrails;
       const examples = safeText(data.examples) || profile.examples;
-      return `---
-name: ${slug}
-description: "${yamlSingleLine(description)}"
-${profile.whenToUse ? `when_to_use: "${yamlSingleLine(profile.whenToUse)}"\n` : ''}version: 0.1.0
-created: ${nowStamp()}
----
-
-# ${readable}
+      const body = `# ${readable}
 
 ## Propósito
 ${safeText(data.description) || profile.purpose}
@@ -1201,13 +1429,22 @@ ${profile.quality}
 ${guardrails}
 
 ## Limitaciones técnicas
-Esta skill es instructiva salvo que se distribuya con scripts, referencias o assets adicionales. No debe afirmar capacidades técnicas exactas —por ejemplo, conteo real de tokens, llamadas API, extracción OCR, validación automática o ejecución de pruebas— si esos recursos no están incluidos en la carpeta de la skill.
+Esta skill opera como instrucción textual. No ejecuta OCR, scripts, llamadas API, validaciones oficiales, consultas a bases de datos ni procesamiento automático de archivos salvo que el entorno de ejecución proporcione esas capacidades de forma independiente.
 
 ## Ejemplos de uso
 ${examples}
 
 ## Revisión humana
 El resultado debe considerarse una propuesta de apoyo. Si se va a usar en producción, publicación, tramitación institucional, descripción documental, decisión profesional o contexto sensible, debe revisarse antes por una persona responsable.`;
+      const frontmatter = buildSkillFrontmatter({
+        name: slug,
+        description,
+        when_to_use: whenToUseItems(profile.whenToUse, activation, description),
+        version: '0.1.0',
+        created: nowStamp(),
+        requires_human_review: 'true'
+      }, body, data.brief || description);
+      return `${frontmatter}\n\n${body}`.trim();
     },
 
 
@@ -1295,9 +1532,23 @@ El resultado debe considerarse una propuesta de apoyo. Si se va a usar en produc
       if (imp) imp.disabled = !hasBrief || this.generating;
     },
 
+    prepareOutputForUse() {
+      const slot = this.slot();
+      if (this.currentType !== 'skill' || !safeText(slot.output)) return slot.output;
+      const normalized = postProcessGenerated('skill', slot.output);
+      if (normalized && normalized !== slot.output) {
+        slot.output = normalized;
+        slot.filename = CompoSecurity.isSafeFilename(slot.filename) ? slot.filename : 'SKILL.md';
+        const out = $('#builder-output');
+        if (out) out.value = normalized;
+      }
+      return slot.output;
+    },
+
     async copyOutput() {
       this.capture();
       const slot = this.slot();
+      this.prepareOutputForUse();
       if (!safeText(slot.output)) return;
       try {
         await navigator.clipboard.writeText(slot.output);
@@ -1316,6 +1567,7 @@ El resultado debe considerarse una propuesta de apoyo. Si se va a usar en produc
     downloadOutput() {
       this.capture();
       const slot = this.slot();
+      this.prepareOutputForUse();
       if (!safeText(slot.output)) return;
       const findings = CompoSecurity.detectPII(slot.output);
       if (findings.length) {

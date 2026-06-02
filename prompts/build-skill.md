@@ -1,6 +1,6 @@
 Construye un archivo SKILL.md completo, operativo y activable a partir del siguiente payload.
 
-Objetivo: generar una Claude Agent Skill útil para activación automática. No basta con una plantilla formalmente válida: la metadata debe permitir que Claude seleccione la skill cuando el usuario formule una petición natural relacionada con su uso. El cuerpo debe ser procedimental, verificable y prudente.
+Objetivo: generar una skill útil para activación automática y reutilización profesional. No basta con una plantilla formalmente válida: el frontmatter YAML debe ser correcto, específico y orientado a discovery; el cuerpo debe ser procedimental, verificable y prudente.
 
 Reglas de interpretación de la instrucción breve:
 - Si la instrucción empieza con fórmulas como “quiero crear una skill”, “necesito una skill”, “skill para Claude que…”, no uses esa fórmula como name, title ni description. Extrae la capacidad real que aparece después.
@@ -9,14 +9,40 @@ Reglas de interpretación de la instrucción breve:
 - Antes de escribir el YAML, infiere internamente: tarea principal, objeto tratado, dominio profesional, disparadores naturales, límites, entradas, formato de salida y riesgos. No muestres esta inferencia; úsala para construir la skill.
 
 Reglas críticas para el frontmatter YAML:
-- Incluye, como mínimo: name, description, version y created.
-- Puedes incluir when_to_use si refuerza la activación. Si lo incluyes, debe ser breve y complementar la description con casos de uso naturales.
-- name debe ser breve, semántico, estable, en minúsculas, con guiones, sin espacios, sin acentos y preferiblemente por debajo de 64 caracteres.
+- El archivo debe empezar exactamente con `---` en la primera línea. No escribas texto antes del frontmatter.
+- Incluye, como mínimo: name, description, when_to_use, compatibility, domain, language, version, created y requires_human_review.
+- name debe cumplir este patrón: minúsculas, números y guiones; sin espacios ni acentos; entre 3 y 64 caracteres; debe empezar por letra o número. Ejemplo: `revisor-descripciones-isadg`.
 - description es el campo más importante para discovery/activación. Debe describir qué hace la skill y cuándo usarla, en tercera persona, en una o dos frases específicas.
 - Pon al principio de description el caso de uso principal. Después añade disparadores naturales que el usuario podría escribir: verbos, tareas, objetos y contextos.
-- No uses descripciones genéricas como “Skill generada con Compo”, “revisar antes de uso operativo”, “ayuda con una tarea” o equivalentes. La procedencia de Compo no debe aparecer en la metadata.
+- when_to_use debe ser una lista YAML con 2-5 casos de uso naturales, específicos y breves. No lo escribas como párrafo largo.
+- compatibility debe ser una lista YAML. Si la skill es portable, usa plataformas genéricas o concretas: `Claude`, `ChatGPT`, `asistentes locales con Ollama`. No asumas una sola plataforma salvo que el usuario lo pida.
+- domain debe ser un identificador breve en minúsculas y con guiones, por ejemplo: `archivistica`, `documentacion`, `privacidad`, `gobernanza-ia`, `prompt-engineering`, `general`.
+- language debe usar código ISO corto cuando sea evidente: `es`, `en`, `fr`, `pt`, etc. Si no hay indicación, usa el idioma del payload.
+- version debe seguir semver simple, por defecto `0.1.0`.
+- created debe ser una fecha en formato `YYYY-MM-DD`. Si no conoces la fecha real, usa `CURRENT_DATE`; Compo la sustituirá por la fecha actual durante la normalización. No inventes fechas.
+- requires_human_review debe ser `true` cuando la skill pueda afectar a decisiones profesionales, jurídicas, institucionales, documentales, reputacionales, de privacidad o publicación. En la práctica, salvo tareas inocuas, usa `true`.
+- No incluyas campos sensibles o peligrosos en el YAML: api_key, token, secret, password, passwd, credential, private_key ni equivalentes.
+- No uses descripciones genéricas o de procedencia como “Skill generada con Compo”, “revisar antes de uso operativo”, “ayuda con una tarea”, “esta habilidad está diseñada para…” o equivalentes. La procedencia de Compo no debe aparecer en la metadata.
 - No incluyas en description advertencias largas, disclaimers ni condiciones que oculten el caso de uso. Los límites van en el cuerpo.
-- Evita promesas absolutas en description: no uses “garantiza”, “certifica”, “valida cumplimiento”, “asegura conformidad” ni equivalentes salvo que el usuario haya aportado una capacidad técnica o jurídica real.
+- Evita promesas absolutas en description: no uses “garantiza”, “certifica”, “valida cumplimiento”, “asegura conformidad”, “asegurando que cumple”, “validar las descripciones” ni equivalentes. Prefiere “revisa”, “comprueba si contempla”, “identifica lagunas”, “señala riesgos” o “propone mejoras”.
+
+Ejemplo de frontmatter recomendado:
+---
+name: revisor-descripciones-isadg
+description: "Revisa borradores de descripción archivística conforme a ISAD(G), separando evidencia literal, inferencias, lagunas, nivel de confianza y recomendaciones de mejora."
+when_to_use:
+  - "Cuando el usuario aporte una transcripción documental y pida una descripción archivística."
+  - "Cuando solicite revisar campos ISAD(G), detectar lagunas o mejorar una descripción existente."
+compatibility:
+  - "Claude"
+  - "ChatGPT"
+  - "asistentes locales con Ollama"
+domain: archivistica
+language: es
+version: 0.1.0
+created: CURRENT_DATE
+requires_human_review: true
+---
 
 Reglas de precisión funcional:
 - No conviertas una revisión orientativa en una certificación. Usa “revisa”, “evalúa preliminarmente”, “comprueba si contempla”, “identifica lagunas”, “señala riesgos” o “propone mejoras”.
@@ -25,7 +51,7 @@ Reglas de precisión funcional:
 - No excluyas casos útiles de forma innecesaria. Por ejemplo, no digas que no se usa si el documento ya fue revisado por un profesional; puede servir como segunda revisión o control de calidad.
 - No prohíbas idiomas salvo que el usuario lo pida. Si el idioma impide revisar con seguridad, indica que debe pedirse aclaración, traducción o contexto.
 - No digas que la skill procesa PDFs, imágenes, OCR, XML, bases de datos, catálogos o APIs si no hay scripts/recursos implementados. Puedes decir que trabaja sobre el contenido textual aportado por el usuario.
-- Si el usuario aporta un documento o archivo en un entorno que permita leerlo, la skill puede trabajar sobre el contenido extraído por Claude, pero no debe prometer extracción técnica propia.
+- Si el usuario aporta un documento o archivo en un entorno que permita leerlo, la skill puede trabajar sobre el contenido extraído por el asistente, pero no debe prometer extracción técnica propia.
 - No excluyas la skill porque el documento ya haya sido revisado por una persona profesional, un DPO o un perfil jurídico. Puede ser útil como segunda revisión, control de calidad o contraste preliminar; limita su alcance sin autoexcluirla.
 - Las entradas esperadas no deben exigir que el usuario aporte una propuesta perfecta o una lista ya estructurada. Acepta texto original, versión tratada, propuesta parcial, criterios aplicados o cualquier combinación razonable.
 
@@ -64,16 +90,16 @@ Reglas específicas para portabilidad de la skill:
 
 - La skill debe ser **utilizable en distintas plataformas de IA**, no solo en Claude. El cuerpo de la skill no debe asumir ningún ejecutor concreto.
 - Habla del ejecutor como "el asistente" o "el modelo" en lugar de "Claude" cuando te refieras genéricamente al sistema que ejecuta la skill. La marca "Claude" puede aparecer en el contexto si el usuario lo pide expresamente o si la instrucción menciona Claude Agent Skills como formato de origen.
-- Si el modo portable está activado en el payload (campo `portable: true`), refuerza esta regla: en ese caso no menciones "Claude" en absoluto, no asumas Artifacts ni capacidades específicas de claude.ai, y mantén el frontmatter en su forma mínima (`name`, `description`, `compatibility`).
-- El campo opcional `compatibility` del frontmatter, cuando aparezca, debe enumerar plataformas concretas (ej. `claude.ai, ChatGPT, asistentes locales con Ollama`).
+- Si el modo portable está activado en el payload (campo `portable: true`), refuerza esta regla: en ese caso no menciones "Claude" en absoluto, no asumas Artifacts ni capacidades específicas de claude.ai, y mantén el frontmatter portable y genérico.
+- En modo portable, compatibility debe incluir más de una plataforma o una fórmula no exclusiva, por ejemplo: `Claude`, `ChatGPT`, `asistentes locales con Ollama`.
 
 Reglas críticas para el cuerpo del SKILL.md:
 - No incluyas una sección “Instrucción base del usuario” salvo que el usuario lo pida expresamente. La skill final debe ser reusable, no un volcado del formulario.
 - Cuerpo centrado en procedimiento real: propósito, cuándo usar, cuándo no usar, entradas esperadas, flujo de trabajo, formato de salida, criterios de calidad, guardrails, limitaciones técnicas, ejemplos y revisión humana cuando proceda.
 - Incluye señales de activación o trigger phrases dentro de “Cuándo usar esta skill” solo si son específicas y naturales.
 - Distingue claramente entre capacidades instructivas y capacidades técnicas. Si la skill no incluye scripts, no prometas conteo exacto de tokens, llamadas API, validaciones automáticas, pruebas unitarias, OCR, conversión de archivos, acceso a bases de datos ni ejecución externa.
-- Si la necesidad implica cálculo, medición o transformación técnica exacta, añade una sección “Limitaciones técnicas” y explica qué puede hacerse sin scripts y qué requeriría scripts auxiliares.
-- No pidas API keys, credenciales ni secretos. Una skill de Claude no debe solicitar claves para funcionar como instrucción.
+- Incluye siempre una sección “Limitaciones técnicas”. Explica que la skill opera como instrucción textual y no ejecuta OCR, scripts, llamadas API, validaciones oficiales, consultas externas ni procesamiento automático de archivos salvo que el entorno proporcione esas capacidades.
+- No pidas API keys, credenciales ni secretos. Una skill instructiva no debe solicitar claves para funcionar.
 - No inventes herramientas, rutas, archivos auxiliares o dependencias que no estén declaradas en el payload.
 - No inventes datos factuales, normativas o capacidades no aportadas por el usuario.
 - Si faltan datos críticos, incorpora preguntas de verificación dentro de la skill, no fuera de ella.
@@ -94,10 +120,19 @@ Reglas específicas para dominios GLAM, archivística, documentación, patrimoni
 Estructura recomendada:
 ---
 name: nombre-semantico-breve
-description: Descripción específica en tercera persona con caso de uso principal y disparadores naturales de activación.
-when_to_use: Casos concretos de uso, si refuerzan la activación sin alargar demasiado la metadata.
+description: "Descripción específica en tercera persona con caso de uso principal y disparadores naturales de activación."
+when_to_use:
+  - "Caso natural de uso 1."
+  - "Caso natural de uso 2."
+compatibility:
+  - "Claude"
+  - "ChatGPT"
+  - "asistentes locales con Ollama"
+domain: general
+language: es
 version: 0.1.0
-created: YYYY-MM-DD
+created: CURRENT_DATE
+requires_human_review: true
 ---
 
 # Título legible
@@ -119,14 +154,12 @@ created: YYYY-MM-DD
 ## Guardrails
 
 ## Limitaciones técnicas
-Incluye esta sección cuando la skill pueda parecer que promete una capacidad técnica no implementada.
 
 ## Ejemplos de uso
 
 ## Revisión humana
-Incluye esta sección cuando exista riesgo institucional, profesional, jurídico, documental, reputacional o de publicación.
 
-Antes de entregar, revisa internamente la salida y corrige estos fallos si aparecen: name accidental, description genérica, lenguaje de garantía/certificación, estados "cumple/no cumple" sin marco formal, límites arbitrarios, ausencia de evidencia textual en la tabla, ejemplos con datos inventados, petición de credenciales o promesa de capacidades técnicas no implementadas, columnas de tabla que pidan al usuario un hash o una firma, denominaciones inventadas de registros oficiales, referencias a "Claude" en cuerpo de skills marcadas como portables.
+Antes de entregar, revisa internamente la salida y corrige estos fallos si aparecen: name accidental, description genérica, description que empiece por “Esta habilidad está diseñada para”, YAML sin cierre, campos obligatorios ausentes, created inventado en lugar de CURRENT_DATE, when_to_use como párrafo largo, lenguaje de garantía/certificación/validación, estados "cumple/no cumple" sin marco formal, límites arbitrarios, ausencia de evidencia textual en la tabla, ejemplos con datos inventados, petición de credenciales o promesa de capacidades técnicas no implementadas, columnas de tabla que pidan al usuario un hash o una firma, denominaciones inventadas de registros oficiales, referencias a "Claude" en cuerpo de skills marcadas como portables.
 
 Devuelve exclusivamente el contenido final del SKILL.md, sin bloque de código, sin explicación introductoria y sin comentario posterior.
 

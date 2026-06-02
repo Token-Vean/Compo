@@ -174,6 +174,8 @@ Desde v0.1.13, Compo deja de distribuirse bajo MIT y pasa a utilizar una licenci
 - Prompts internos externalizados en `/prompts/`.
 - Plantillas externalizadas en `/plantillas/`.
 - Generación de skills con `name` breve, `description` orientada a activación automática y cuerpo operativo.
+- Normalización y reparación defensiva del frontmatter YAML de `SKILL.md`: `name`, `description`, `when_to_use`, `compatibility`, `domain`, `language`, `version`, `created` y `requires_human_review`.
+- Conversión de `when_to_use` a lista YAML cuando procede, para mejorar activación, legibilidad y portabilidad.
 - Reglas específicas para skills de anonimización, seudonimización y protección de datos: no reidentificación, evidencia mínima/enmascarada, no reconstrucción de datos ocultos y rechazo de recomendaciones técnicas no implementadas.
 - Prohibición en prompts internos de prometer capacidades técnicas no implementadas, como conteo exacto de tokens, OCR, llamadas API o scripts inexistentes.
 - Detección heurística de PII antes de descargar.
@@ -184,6 +186,7 @@ Desde v0.1.13, Compo deja de distribuirse bajo MIT y pasa a utilizar una licenci
 
 - Importar y auditar `SKILL.md` existentes.
 - Añadir una puntuación específica de calidad para `SKILL.md`.
+- Añadir una acción visible de “Reparar YAML” para reconstruir manualmente solo el frontmatter cuando el usuario edite una skill.
 - Añadir comparación visual entre versiones generadas.
 - Incorporar tests de UI con Playwright.
 - Separar `compo.js` en módulos internos cuando el comportamiento esté estabilizado.
