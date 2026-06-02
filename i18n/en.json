@@ -189,19 +189,19 @@
       "options": {
         "light": {
           "tagline": "Light",
-          "desc": "Fast responses but less nuanced. For machines with 8 GB of RAM or less."
+          "desc": "Current lightweight option for modest machines. A good starting point for prompts and guided generation."
         },
         "balanced": {
           "tagline": "Balanced · recommended",
-          "desc": "Best quality-speed trade-off for this tool. For machines with 16 GB of RAM."
+          "desc": "Recommended balance for general Compo use. Better quality without requiring a very large model."
         },
         "powerful": {
-          "tagline": "Powerful",
-          "desc": "Better audit quality and suggestions. For machines with 16 GB of RAM or more."
+          "tagline": "Advanced",
+          "desc": "Stronger reasoning, critical review, and complex generation. Requires more memory."
         },
         "alternative": {
           "tagline": "Alternative",
-          "desc": "Robust, well-tested model on instruction-following tasks. For machines with 16 GB of RAM."
+          "desc": "Robust model for multilingual and instruction-following tasks. For machines with 16 GB of RAM."
         }
       }
     },

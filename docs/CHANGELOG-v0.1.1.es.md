@@ -16,7 +16,7 @@
 - Se actualiza `router.js` para incluir la nueva pantalla `builder`.
 - Se refactoriza `compo.js` para incorporar el builder unificado, validación de campos obligatorios, generación con Ollama, fallback local, exportación y plantillas.
 - Se mejora `ollama.js` con timeout real de generación, propagación de errores HTTP y mayor límite de salida (`num_predict`) para skills.
-- Se sustituyen referencias a modelos no válidos `gemma4:*` por modelos existentes en Ollama: `gemma3n:e2b`, `gemma3n:e4b`, `qwen3:8b` y `phi3.5:3.8b`.
+- Se añade una allowlist inicial de modelos recomendados en `ollama.js`, revisable en versiones posteriores según disponibilidad y rendimiento de los modelos publicados en Ollama.
 - Se eliminan estilos inline del HTML para respetar mejor la CSP declarada.
 - Se actualiza la documentación de CORS para contemplar tanto `http://127.0.0.1:8765` como `http://localhost:8765`.
 - Se actualiza `SHA256SUMS.txt` con los hashes de la nueva distribución.

@@ -105,10 +105,10 @@ Compo funciona sin Ollama, pero su utilidad principal en esta versión es la asi
 
 | Modelo        | Tamaño aproximado | Uso recomendado |
 | ------------- | ----------------- | --------------- |
-| `phi3.5:3.8b` | ~2 GB             | Equipos modestos, 8 GB de RAM |
-| `gemma3n:e2b` | ~5.6 GB           | Equilibrio recomendado, 12-16 GB de RAM |
-| `gemma3n:e4b` | ~7.5 GB           | Más calidad, 16 GB de RAM |
-| `qwen3:8b`    | ~5.2 GB           | Alternativa robusta, 16 GB de RAM |
+| `gemma4:e2b`  | ~7.2 GB           | Opción ligera actual para equipos modestos; 128K de contexto |
+| `gemma4:e4b`  | ~9.6 GB           | Equilibrio recomendado para uso general; 128K de contexto |
+| `gpt-oss:20b` | ~14 GB            | Mayor capacidad de razonamiento y auditoría; recomendado para 16 GB de RAM o más |
+| `qwen3:8b`    | ~5.2 GB           | Alternativa robusta para tareas multilingües e instruccionales |
 
 Otros modelos descargados manualmente con `ollama pull` también se detectan y pueden usarse como modelo activo.
 

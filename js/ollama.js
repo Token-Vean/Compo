@@ -25,22 +25,22 @@
   const RECOMMENDED_MODELS = [
     {
       key: 'light',
-      id: 'phi3.5:3.8b',
-      sizeGB: 2.2,
+      id: 'gemma4:e2b',
+      sizeGB: 7.2,
       ramMinGB: 8,
       i18nKey: 'models.recommended.options.light'
     },
     {
       key: 'balanced',
-      id: 'gemma3n:e2b',
-      sizeGB: 5.6,
-      ramMinGB: 12,
+      id: 'gemma4:e4b',
+      sizeGB: 9.6,
+      ramMinGB: 16,
       i18nKey: 'models.recommended.options.balanced'
     },
     {
       key: 'powerful',
-      id: 'gemma3n:e4b',
-      sizeGB: 7.5,
+      id: 'gpt-oss:20b',
+      sizeGB: 14,
       ramMinGB: 16,
       i18nKey: 'models.recommended.options.powerful'
     },
@@ -153,7 +153,7 @@
 
     pickDefaultModel() {
       if (!this.models.length) return null;
-      // Preferencia: gemma3n:e2b → gemma3n:e4b → qwen3:8b → phi3.5 → cualquier otro.
+      // Preferencia: gemma4:e2b → gemma4:e4b → gpt-oss:20b → qwen3:8b → cualquier otro.
       for (const pref of RECOMMENDED_MODELS) {
         const found = this.models.find(m => m.name === pref.id);
         if (found) return found.name;

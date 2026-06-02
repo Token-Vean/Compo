@@ -189,19 +189,19 @@
       "options": {
         "light": {
           "tagline": "Ligero",
-          "desc": "Respuestas rápidas pero menos matizadas. Para equipos con 8 GB de RAM o menos."
+          "desc": "Opción ligera actual para equipos modestos. Buen punto de entrada para prompts y generación guiada."
         },
         "balanced": {
           "tagline": "Equilibrado · recomendado",
-          "desc": "El mejor compromiso entre calidad y velocidad para esta herramienta. Para equipos con 16 GB de RAM."
+          "desc": "Equilibrio recomendado para el uso general de Compo. Mejor calidad sin exigir un modelo muy grande."
         },
         "powerful": {
-          "tagline": "Potente",
-          "desc": "Mejor calidad de auditoría y sugerencias. Para equipos con 16 GB de RAM o más."
+          "tagline": "Avanzado",
+          "desc": "Mayor capacidad de razonamiento, revisión crítica y generación compleja. Requiere más memoria."
         },
         "alternative": {
           "tagline": "Alternativa",
-          "desc": "Modelo robusto y bien probado en tareas de instrucción. Para equipos con 16 GB de RAM."
+          "desc": "Modelo robusto para tareas multilingües e instruccionales. Para equipos con 16 GB de RAM."
         }
       }
     },

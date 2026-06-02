@@ -96,7 +96,7 @@ Esta es la forma más cómoda, especialmente si no estás familiarizado con la l
 ### Opción B · Desde la línea de comandos
 
 ```bash
-ollama pull gemma3n:e2b
+ollama pull gemma4:e2b
 ```
 
 (o cualquier otro modelo). Tras descargarlo, recarga Compo y aparecerá en la lista.
@@ -107,12 +107,12 @@ Compo usa el modelo principalmente para tres tareas: refinar redacción de campo
 
 | Modelo            | Tamaño  | Perfil                                                |
 | ----------------- | ------- | ----------------------------------------------------- |
-| `phi3.5:3.8b`     | ~2.2 GB | Mínimo viable. Para portátiles modestos.              |
-| `gemma3n:e2b`     | ~5.6 GB | Equilibrio recomendado. 12-16 GB de RAM.              |
-| `gemma3n:e4b`     | ~7.5 GB | Mejor calidad de generación. 16 GB de RAM o más.      |
-| `qwen3:8b`        | ~5.2 GB | Alternativa robusta. 16 GB de RAM.                    |
+| `gemma4:e2b`      | ~7.2 GB | Opción ligera actual. 8-12 GB de RAM.                 |
+| `gemma4:e4b`      | ~9.6 GB | Equilibrio recomendado. 16 GB de RAM.                 |
+| `gpt-oss:20b`     | ~14 GB  | Mayor razonamiento y auditoría. 16 GB de RAM o más.   |
+| `qwen3:8b`        | ~5.2 GB | Alternativa robusta multilingüe. 16 GB de RAM.        |
 
-Estos cuatro son los que Compo ofrece como descarga directa desde la pantalla "Modelo IA local". Si descargas otros manualmente con `ollama pull <modelo>`, Compo los detecta y aparecen también en la lista de modelos descargados, listos para usar como activos. La allowlist visible es una decisión de curaduría, no de seguridad: solo se ofrecen modelos que se han verificado que rinden bien con los prompts internos de Compo.
+Estos cuatro son los que Compo ofrece como descarga directa desde la pantalla "Modelo IA local". Si descargas otros manualmente con `ollama pull <modelo>`, Compo los detecta y aparecen también en la lista de modelos descargados, listos para usar como activos. La allowlist visible es una decisión de curaduría, no de seguridad: se priorizan modelos actuales del registro oficial de Ollama que equilibran calidad, contexto, razonamiento y viabilidad en equipos locales.
 
 ## 5. Solución de problemas
 
