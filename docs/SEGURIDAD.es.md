@@ -116,3 +116,19 @@ Si encuentras un problema de seguridad, no abras un issue público. Contacta dir
 ## Nota v0.1.13
 
 Compo permite detectar, seleccionar y descargar modelos de Ollama, pero no borrar modelos locales desde la interfaz. La gestión destructiva de modelos queda fuera de la aplicación y debe realizarse, si procede, desde las herramientas propias de Ollama por una persona responsable.
+
+
+## Endurecimiento v0.1.14
+
+- El servidor local devuelve 404 para cualquier ruta con componentes ocultos
+  (que empiecen por `.`), lo que impide servir `.git` y archivos de
+  configuración ocultos aunque estén presentes en el directorio.
+- El listado de directorios está desactivado: solicitar un directorio sin
+  índice devuelve 404.
+- El zip de distribución se genera con `tools/release.py`, que excluye
+  `.git/` y artefactos de desarrollo.
+- La detección de DNI/NIE valida el dígito de control (módulo 23) para
+  reducir falsos positivos, y el aviso previo a la descarga muestra los
+  hallazgos enmascarados en lugar del dato completo.
+- El guardado de sesión es opt-in, usa exclusivamente `sessionStorage`
+  (memoria de la pestaña, se destruye al cerrarla) y nunca escribe en disco.

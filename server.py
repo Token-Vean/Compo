@@ -5,17 +5,22 @@ Compo · servidor local
 Servidor HTTP estático limitado a localhost con un endpoint interno de apagado.
 No expone Compo en la red y no requiere dependencias externas.
 
-Mejoras de seguridad respecto a v0.1.5:
-- Comprobación de Origin / Sec-Fetch-Site en endpoints internos para mitigar
-  CSRF desde páginas externas (un atacante con `mode: no-cors` ya no puede
-  apagar el servidor de la víctima).
-- Cabeceras de seguridad endurecidas: Content-Security-Policy y Permissions-Policy
-  enviadas también por HTTP, además del meta del HTML; aislamiento por origen
-  con Cross-Origin-Opener-Policy y Cross-Origin-Resource-Policy.
-- Versión consolidada en una constante única.
-- El header `Server:` no revela versión específica para reducir fingerprinting.
-- Mensaje claro si el puerto está ocupado, en lugar de stack trace.
-- Comprobación de versión mínima de Python.
+Mejoras de seguridad respecto a v0.1.13:
+- Bloqueo de archivos y directorios ocultos (dotfiles): rutas que contengan
+  un componente que empiece por "." devuelven 404. Evita servir .git,
+  .gitignore, .github y similares si están presentes en el directorio.
+- Listado de directorios desactivado: solicitar un directorio sin índice
+  devuelve 404 en lugar de enumerar su contenido.
+- Cache-Control: no-cache en HTML para que el navegador revalide la app
+  tras una actualización; el resto de estáticos se sirven sin directivas
+  de caché agresivas.
+
+Se mantienen de v0.1.13:
+- Comprobación de Origin / Sec-Fetch-Site en endpoints internos (mitigación
+  CSRF: una página externa con `mode: no-cors` no puede apagar el servidor).
+- Cabeceras de seguridad endurecidas (CSP, Permissions-Policy, COOP, CORP).
+- Header `Server:` sin versión específica para reducir fingerprinting.
+- Mensaje claro si el puerto está ocupado y comprobación de versión de Python.
 """
 
 from __future__ import annotations
@@ -23,13 +28,13 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import posixpath
 import sys
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any
 
-__version__ = "0.1.13"
+__version__ = "0.1.14"
 
 # Comprobar versión mínima de Python antes de usar tipos modernos.
 if sys.version_info < (3, 8):
@@ -47,8 +52,6 @@ ALLOWED_ORIGINS_TEMPLATE = (
 )
 
 # Política de seguridad de contenido enviada por HTTP.
-# Replica la CSP del meta del HTML, con la mejora de cubrir también todos los
-# recursos estáticos (los meta solo afectan al documento que los contiene).
 CSP = (
     "default-src 'self'; "
     "script-src 'self'; "
@@ -62,7 +65,6 @@ CSP = (
     "object-src 'none'"
 )
 
-# Permissions-Policy: una app local no necesita ninguna API sensible del navegador.
 PERMISSIONS_POLICY = (
     "accelerometer=(), camera=(), geolocation=(), gyroscope=(), "
     "magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()"
@@ -70,12 +72,22 @@ PERMISSIONS_POLICY = (
 
 
 def _is_allowed_origin(value, allowed):
-    """Devuelve True si el valor coincide exactamente con alguno de los
-    orígenes permitidos. La comparación es estricta: sin tolerancia a
-    subdominios ni a wildcards."""
+    """Comparación estricta contra los orígenes permitidos, sin tolerancia a
+    subdominios ni wildcards."""
     if not value:
         return False
     return value in allowed
+
+
+def _path_has_hidden_component(url_path):
+    """True si algún componente de la ruta empieza por punto.
+
+    Se evalúa sobre la ruta URL ya sin query/fragment. Bloquea el acceso a
+    .git, .gitignore, .github, archivos de configuración ocultos, etc.,
+    incluso si por error terminan dentro de la distribución.
+    """
+    clean = posixpath.normpath(url_path.split("?", 1)[0].split("#", 1)[0])
+    return any(part.startswith(".") for part in clean.split("/") if part)
 
 
 class CompoServer(ThreadingHTTPServer):
@@ -90,15 +102,52 @@ class CompoHandler(SimpleHTTPRequestHandler):
     sys_version = ""  # oculta también la versión de Python.
 
     def end_headers(self):
-        # Cabeceras estáticas para todos los recursos.
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("Permissions-Policy", PERMISSIONS_POLICY)
         self.send_header("Cross-Origin-Opener-Policy", "same-origin")
         self.send_header("Cross-Origin-Resource-Policy", "same-origin")
-        # CSP es relevante sobre todo en el HTML; en otros recursos no daña.
         self.send_header("Content-Security-Policy", CSP)
         super().end_headers()
+
+    # ------------------------------------------------------------------ #
+    # Endurecimiento del servidor de estáticos
+    # ------------------------------------------------------------------ #
+    def send_head(self):
+        # 1) Nunca servir rutas con componentes ocultos (dotfiles).
+        if _path_has_hidden_component(self.path):
+            self.send_error(404, "Not found")
+            return None
+        # 2) Nunca listar directorios: si la ruta resuelve a un directorio,
+        #    solo se sirve si existe un index; en caso contrario, 404.
+        path = self.translate_path(self.path)
+        if os.path.isdir(path):
+            for index in ("index.html", "index.htm"):
+                if os.path.exists(os.path.join(path, index)):
+                    break
+            else:
+                self.send_error(404, "Not found")
+                return None
+        return super().send_head()
+
+    def list_directory(self, path):
+        # Defensa en profundidad: aunque send_head ya bloquea directorios,
+        # cualquier ruta que llegue aquí recibe 404 en lugar de un listado.
+        self.send_error(404, "Not found")
+        return None
+
+    def guess_type(self, path):
+        ctype = super().guess_type(path)
+        # Revalidación del HTML tras actualizaciones de la app.
+        if str(path).endswith((".html", ".htm")):
+            self._compo_no_cache = True
+        return ctype
+
+    def send_response(self, code, message=None):
+        super().send_response(code, message)
+        if getattr(self, "_compo_no_cache", False):
+            self.send_header("Cache-Control", "no-cache")
+            self._compo_no_cache = False
 
     # ------------------------------------------------------------------ #
     # Helpers internos
@@ -113,9 +162,6 @@ class CompoHandler(SimpleHTTPRequestHandler):
 
         if origin is not None:
             return _is_allowed_origin(origin, allowed)
-        # Sin Origin: aceptamos solo si el navegador marca explícitamente
-        # same-origin. Esto bloquea peticiones cross-origin (que llevarían
-        # cross-site) y peticiones de páginas no-https sin origin enviado.
         if sfs == "same-origin":
             return True
         # Las herramientas locales (curl, wget) no envían Origin ni
@@ -156,14 +202,12 @@ class CompoHandler(SimpleHTTPRequestHandler):
             return
 
         if not self._origin_ok():
-            # No revelamos detalles del origen; respuesta genérica.
             self._send_json({
                 "ok": False,
                 "error": "forbidden_origin",
             }, status=403)
             return
 
-        # Consumir un posible body pequeño para evitar dejar datos pendientes.
         length = int(self.headers.get("Content-Length") or 0)
         if length:
             self.rfile.read(min(length, 4096))
@@ -183,8 +227,6 @@ class CompoHandler(SimpleHTTPRequestHandler):
         threading.Timer(0.35, stop).start()
 
     def log_message(self, fmt, *args):
-        # Log mínimo: suficiente para diagnóstico local, sin registrar cuerpos
-        # ni datos del usuario.
         try:
             line = fmt % args
         except Exception:
@@ -193,8 +235,6 @@ class CompoHandler(SimpleHTTPRequestHandler):
 
 
 def _bind_server(host, port, handler):
-    """Intenta crear el servidor y muestra un mensaje legible si el puerto
-    está ocupado."""
     try:
         return CompoServer((host, port), handler)
     except OSError as exc:

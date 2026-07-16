@@ -1,27 +1,45 @@
 /* ===========================================================================
-   Compo · Ollama client
+   Compo · Ollama client (v0.1.14)
    Comunicación con la API local de Ollama. No realiza ninguna llamada de red
-   más allá de http://localhost:11434. La CSP debe restringir connect-src a
-   ese origen para que esta promesa sea verificable por el usuario.
+   más allá de Ollama en localhost. La CSP restringe connect-src a
+   http://127.0.0.1:11434 y http://localhost:11434 para que esta promesa sea
+   verificable por el usuario.
+
+   Cambios v0.1.14:
+   - Detección de endpoint dual: prueba 127.0.0.1 y localhost y usa el que
+     responda (en algunos sistemas "localhost" resuelve a ::1/IPv6 mientras
+     Ollama solo escucha en 127.0.0.1).
+   - num_ctx explícito: sin él, Ollama usa un contexto por defecto pequeño y
+     TRUNCA el prompt en silencio; los prompts internos de Compo lo superan.
+   - Generación en streaming vía /api/chat con callback onToken y soporte de
+     cancelación (AbortSignal).
+   - Comprobación de done_reason: si la salida se cortó por límite de tokens
+     (done_reason === "length"), se marca truncated=true para avisar en la UI.
    =========================================================================== */
 
 (function() {
   'use strict';
 
-  const ENDPOINT = 'http://localhost:11434';
+  // Se prueba primero 127.0.0.1 (más fiable que "localhost", que puede
+  // resolver a ::1 donde Ollama no escucha por defecto).
+  const CANDIDATE_ENDPOINTS = [
+    'http://127.0.0.1:11434',
+    'http://localhost:11434'
+  ];
   const DETECT_TIMEOUT_MS = 2500;
-  const GENERATE_TIMEOUT_MS = 180000;
+  const GENERATE_TIMEOUT_MS = 300000; // 5 min: streaming permite cancelar antes.
+
+  // Contexto explícito. El valor por defecto de Ollama (a menudo 4096) es
+  // insuficiente para los prompts internos de Compo y provoca truncamiento
+  // silencioso de las instrucciones. Ajustable por llamada vía options.num_ctx.
+  const DEFAULT_NUM_CTX = 16384;
+
+  // Estimación aproximada de tokens (heurística conservadora para ES/EN).
+  function approxTokens(text) {
+    return Math.ceil(String(text || '').length / 3.2);
+  }
 
   // Allowlist de modelos recomendados que la UI ofrece como atajo.
-  // Esta lista es la única fuente de descarga desde Compo: por curaduría
-  // (modelos verificados que rinden bien con los prompts de Compo) y por
-  // simplicidad de UX. Los modelos que el usuario ya tenga descargados
-  // manualmente (vía CLI de Ollama) seguirán apareciendo en la lista de
-  // descargados y serán seleccionables como activos.
-  //
-  // Para añadir un modelo nuevo a la allowlist, edita esta tabla. En una versión posterior
-  // está previsto mover esto a un archivo models.json externo editable
-  // por el administrador del despliegue sin tocar el código.
   const RECOMMENDED_MODELS = [
     {
       key: 'light',
@@ -53,16 +71,12 @@
     }
   ];
 
-  // Validación defensiva del nombre de modelo. Solo aceptamos lo que el
-  // registro de Ollama acepta: alfanumérico, guiones, puntos, dos puntos,
-  // barras (para namespaces tipo library/qwen2.5). Sin espacios, sin shell.
   const MODEL_NAME_RE = /^[a-z0-9][a-z0-9._:/-]{0,127}$/i;
 
   function isValidModelName(name) {
     if (typeof name !== 'string') return false;
     if (name.length < 2 || name.length > 128) return false;
     if (!MODEL_NAME_RE.test(name)) return false;
-    // Bloquear caracteres que no deberían aparecer aunque pasaran la regex.
     if (/[\s'"<>;&|`$()]/.test(name)) return false;
     return true;
   }
@@ -75,39 +89,68 @@
     return mb.toFixed(0) + ' MB';
   }
 
-
   function friendlyFetchError(err, action) {
     if (err && err.name === 'AbortError') {
       return action === 'generate'
-        ? 'La generación local ha superado el tiempo máximo. Prueba con un modelo más ligero, reduce la instrucción o regenera de nuevo.'
-        : 'La operación con Ollama ha superado el tiempo máximo.';
+        ? CompoI18n.t('ollama.errors.generate_timeout')
+        : CompoI18n.t('ollama.errors.timeout');
     }
     if (err && err.name === 'TypeError') {
-      return 'No se pudo conectar con Ollama en http://localhost:11434. Comprueba que Ollama está instalado, iniciado y accesible desde este navegador.';
+      return CompoI18n.t('ollama.errors.unreachable');
     }
-    return err && err.message ? err.message : 'Error desconocido al comunicarse con Ollama.';
+    return err && err.message ? err.message : CompoI18n.t('ollama.errors.unknown');
   }
 
   function friendlyHttpError(status, details, action) {
-    const suffix = details ? ` Detalle: ${details}` : '';
+    const suffix = details ? ' ' + CompoI18n.t('ollama.errors.detail', { details }) : '';
     if (status === 404) {
-      return action === 'generate'
-        ? `El modelo seleccionado no se encontró en Ollama. Actualiza la lista de modelos o descarga/selecciona otro modelo.${suffix}`
-        : `Ollama no encontró el recurso o modelo solicitado.${suffix}`;
+      return (action === 'generate'
+        ? CompoI18n.t('ollama.errors.model_not_found')
+        : CompoI18n.t('ollama.errors.resource_not_found')) + suffix;
     }
-    if (status === 400) return `Ollama rechazó la solicitud. Revisa el modelo seleccionado y vuelve a intentarlo.${suffix}`;
-    if (status === 500) return `Ollama devolvió un error interno. Puede faltar memoria, el modelo puede estar corrupto o la solicitud puede ser demasiado larga.${suffix}`;
-    if (status === 503) return `Ollama no está disponible temporalmente o está ocupado. Espera unos segundos y vuelve a intentarlo.${suffix}`;
-    return `Ollama devolvió HTTP ${status}.${suffix}`;
+    if (status === 400) return CompoI18n.t('ollama.errors.bad_request') + suffix;
+    if (status === 500) return CompoI18n.t('ollama.errors.internal') + suffix;
+    if (status === 503) return CompoI18n.t('ollama.errors.busy') + suffix;
+    return CompoI18n.t('ollama.errors.http', { status }) + suffix;
   }
 
   /**
-   * Cliente Ollama.
-   * Estado actual cacheado: lista de modelos descargados y modelo activo.
-   * El "modelo activo" es una preferencia del usuario, persistida.
+   * Lee un cuerpo NDJSON en streaming, invocando onLine(objeto) por línea.
    */
+  async function readNDJSON(res, onLine) {
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        let data;
+        try { data = JSON.parse(trimmed); } catch { continue; }
+        if (data.error) throw new Error(data.error);
+        onLine(data);
+      }
+    }
+    const tail = buffer.trim();
+    if (tail) {
+      try {
+        const data = JSON.parse(tail);
+        if (data.error) throw new Error(data.error);
+        onLine(data);
+      } catch (e) {
+        if (e && e.message && !(e instanceof SyntaxError)) throw e;
+      }
+    }
+  }
+
   const Ollama = {
     available: null, // null = no chequeado, true/false tras detect()
+    endpoint: CANDIDATE_ENDPOINTS[0],
     models: [],
     activeModel: null,
     abortDownload: null,
@@ -117,43 +160,44 @@
       await this.detect();
     },
 
-    async detect() {
+    async _probe(endpoint) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), DETECT_TIMEOUT_MS);
       try {
-        const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), DETECT_TIMEOUT_MS);
-        const res = await fetch(`${ENDPOINT}/api/tags`, {
-          method: 'GET',
-          signal: ctrl.signal
-        });
+        const res = await fetch(`${endpoint}/api/tags`, { method: 'GET', signal: ctrl.signal });
         clearTimeout(timer);
-        if (!res.ok) {
-          this.available = false;
-          this.models = [];
-          this.notify();
-          return false;
-        }
+        if (!res.ok) return null;
         const data = await res.json();
-        this.available = true;
-        this.models = Array.isArray(data.models) ? data.models : [];
-        // Si no hay modelo activo persistido o el persistido ya no existe,
-        // intentar elegir uno razonable.
-        if (!this.activeModel || !this.hasModel(this.activeModel)) {
-          this.activeModel = this.pickDefaultModel();
-          this.writeActiveModel(this.activeModel);
-        }
-        this.notify();
-        return true;
+        return Array.isArray(data.models) ? data.models : [];
       } catch (e) {
-        this.available = false;
-        this.models = [];
-        this.notify();
-        return false;
+        clearTimeout(timer);
+        return null;
       }
+    },
+
+    async detect() {
+      for (const endpoint of CANDIDATE_ENDPOINTS) {
+        const models = await this._probe(endpoint);
+        if (models !== null) {
+          this.endpoint = endpoint;
+          this.available = true;
+          this.models = models;
+          if (!this.activeModel || !this.hasModel(this.activeModel)) {
+            this.activeModel = this.pickDefaultModel();
+            this.writeActiveModel(this.activeModel);
+          }
+          this.notify();
+          return true;
+        }
+      }
+      this.available = false;
+      this.models = [];
+      this.notify();
+      return false;
     },
 
     pickDefaultModel() {
       if (!this.models.length) return null;
-      // Preferencia: gemma4:e2b → gemma4:e4b → gpt-oss:20b → qwen3:8b → cualquier otro.
       for (const pref of RECOMMENDED_MODELS) {
         const found = this.models.find(m => m.name === pref.id);
         if (found) return found.name;
@@ -186,18 +230,15 @@
 
     /**
      * Descarga un modelo con progreso en streaming.
-     * @param {string} name
-     * @param {(event: object) => void} onProgress
-     * @returns {Promise<void>}
      */
     async pullModel(name, onProgress) {
       if (!isValidModelName(name)) {
-        throw new Error('Nombre de modelo no válido.');
+        throw new Error(CompoI18n.t('ollama.errors.invalid_model_name'));
       }
       this.abortDownload = new AbortController();
       let res;
       try {
-        res = await fetch(`${ENDPOINT}/api/pull`, {
+        res = await fetch(`${this.endpoint}/api/pull`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, stream: true }),
@@ -214,29 +255,9 @@
         } catch { /* respuesta no JSON */ }
         throw new Error(friendlyHttpError(res.status, details, 'pull'));
       }
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop();
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed) continue;
-          let data;
-          try { data = JSON.parse(trimmed); } catch { continue; }
-          if (data.error) {
-            throw new Error(data.error);
-          }
-          if (typeof onProgress === 'function') {
-            onProgress(data);
-          }
-        }
-      }
-      // Refrescar lista al terminar.
+      await readNDJSON(res, (data) => {
+        if (typeof onProgress === 'function') onProgress(data);
+      });
       await this.detect();
     },
 
@@ -247,46 +268,64 @@
       }
     },
 
-
     /**
-     * Generación de texto. Usado por el builder unificado para generar prompts, agentes y skills con el modelo local activo.
+     * Generación de texto en streaming vía /api/chat.
+     *
+     * @param {object} opts
+     *   prompt   (string, obligatorio)  mensaje de usuario
+     *   system   (string, opcional)     mensaje de sistema
+     *   model    (string, opcional)     por defecto, el modelo activo
+     *   signal   (AbortSignal, opcional) cancelación externa (botón Cancelar)
+     *   options  (object, opcional)     opciones de Ollama (temperature, etc.)
+     *   onToken  (function, opcional)   onToken(chunk, textoAcumulado)
+     * @returns {Promise<{text, model, totalDurationMs, truncated, doneReason}>}
      */
     async generate(opts) {
-      const { prompt, system, model, format, signal, options } = opts || {};
+      const { prompt, system, model, signal, options, onToken } = opts || {};
       if (!prompt) throw new Error('Missing prompt');
       const useModel = model || this.activeModel;
       if (!useModel) throw new Error('No active model');
 
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), GENERATE_TIMEOUT_MS);
+      let externallyAborted = false;
       if (signal) {
-        if (signal.aborted) ctrl.abort();
-        else signal.addEventListener('abort', () => ctrl.abort(), { once: true });
+        if (signal.aborted) { externallyAborted = true; ctrl.abort(); }
+        else signal.addEventListener('abort', () => { externallyAborted = true; ctrl.abort(); }, { once: true });
       }
 
-      try {
-        const body = {
-          model: useModel,
-          prompt: String(prompt),
-          stream: false,
-          options: Object.assign({
-            temperature: 0.25,
-            top_p: 0.9,
-            num_predict: 4096
-          }, options || {})
-        };
-        if (system) body.system = String(system);
-        if (format === 'json') body.format = 'json';
+      const mergedOptions = Object.assign({
+        temperature: 0.25,
+        top_p: 0.9,
+        num_predict: 4096,
+        num_ctx: DEFAULT_NUM_CTX
+      }, options || {});
 
+      const messages = [];
+      if (system) messages.push({ role: 'system', content: String(system) });
+      messages.push({ role: 'user', content: String(prompt) });
+
+      // Aviso preventivo de contexto: si el prompt estimado se acerca al
+      // límite, el modelo podría perder el principio de las instrucciones.
+      const promptTokens = approxTokens((system || '') + prompt);
+      const contextTight = promptTokens > Math.floor(mergedOptions.num_ctx * 0.75);
+
+      try {
         let res;
         try {
-          res = await fetch(`${ENDPOINT}/api/generate`, {
+          res = await fetch(`${this.endpoint}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
+            body: JSON.stringify({
+              model: useModel,
+              messages,
+              stream: true,
+              options: mergedOptions
+            }),
             signal: ctrl.signal
           });
         } catch (err) {
+          if (externallyAborted) throw Object.assign(new Error(CompoI18n.t('ollama.errors.cancelled')), { cancelled: true });
           if (err && (err.name === 'AbortError' || ctrl.signal.aborted)) {
             throw new Error(friendlyFetchError({ name: 'AbortError' }, 'generate'));
           }
@@ -296,23 +335,48 @@
           let details = '';
           try {
             const err = await res.json();
-            details = err && err.error ? `: ${err.error}` : '';
+            details = err && err.error ? err.error : '';
           } catch { /* respuesta no JSON */ }
-          throw new Error(friendlyHttpError(res.status, details.replace(/^: /, ''), 'generate'));
+          throw new Error(friendlyHttpError(res.status, details, 'generate'));
         }
-        let data;
+
+        let text = '';
+        let doneReason = null;
+        let totalDuration = null;
+        let responseModel = useModel;
         try {
-          data = await res.json();
-        } catch {
-          throw new Error('Ollama devolvió una respuesta no interpretable. Reinicia la generación o cambia de modelo.');
+          await readNDJSON(res, (data) => {
+            if (data.message && typeof data.message.content === 'string' && data.message.content) {
+              text += data.message.content;
+              if (typeof onToken === 'function') onToken(data.message.content, text);
+            }
+            if (data.done) {
+              doneReason = data.done_reason || null;
+              if (data.total_duration) totalDuration = Math.round(data.total_duration / 1e6);
+              if (data.model) responseModel = data.model;
+            }
+          });
+        } catch (err) {
+          if (externallyAborted) {
+            // Cancelación del usuario: devolvemos lo acumulado marcándolo.
+            throw Object.assign(new Error(CompoI18n.t('ollama.errors.cancelled')), { cancelled: true, partialText: text });
+          }
+          if (ctrl.signal.aborted) {
+            throw new Error(friendlyFetchError({ name: 'AbortError' }, 'generate'));
+          }
+          throw err;
         }
-        if (!data || typeof data.response !== 'string') {
-          throw new Error('Ollama no devolvió texto de respuesta. Prueba con otro modelo o reduce la instrucción.');
+
+        if (!text) {
+          throw new Error(CompoI18n.t('ollama.errors.empty_response'));
         }
         return {
-          text: data.response || '',
-          model: data.model || useModel,
-          totalDurationMs: data.total_duration ? Math.round(data.total_duration / 1e6) : null
+          text,
+          model: responseModel,
+          totalDurationMs: totalDuration,
+          truncated: doneReason === 'length',
+          doneReason,
+          contextTight
         };
       } finally {
         clearTimeout(timer);
@@ -323,6 +387,7 @@
       document.dispatchEvent(new CustomEvent('compo:ollama-changed', {
         detail: {
           available: this.available,
+          endpoint: this.endpoint,
           models: this.models,
           activeModel: this.activeModel
         }
@@ -332,7 +397,9 @@
     // Utilidades expuestas
     isValidModelName,
     formatBytes,
-    RECOMMENDED_MODELS
+    approxTokens,
+    RECOMMENDED_MODELS,
+    DEFAULT_NUM_CTX
   };
 
   window.CompoOllama = Ollama;

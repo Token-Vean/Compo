@@ -41,7 +41,23 @@
     "active_with_model": "Asistencia IA local activa · Modelo: {model}",
     "inactive_help": "Toca aquí para configurar Ollama",
     "ephemeral": "Modo efímero",
-    "open_settings": "Abrir ajustes de modelos"
+    "open_settings": "Abrir ajustes de modelos",
+    "errors": {
+      "generate_timeout": "La generación local ha superado el tiempo máximo. Prueba con un modelo más ligero, reduce la instrucción o regenera de nuevo.",
+      "timeout": "La operación con Ollama ha superado el tiempo máximo.",
+      "unreachable": "No se pudo conectar con Ollama (se prueban 127.0.0.1 y localhost en el puerto 11434). Comprueba que Ollama está instalado, iniciado y accesible desde este navegador.",
+      "unknown": "Error desconocido al comunicarse con Ollama.",
+      "detail": "Detalle: {details}",
+      "model_not_found": "El modelo seleccionado no se encontró en Ollama. Actualiza la lista de modelos o descarga/selecciona otro modelo.",
+      "resource_not_found": "Ollama no encontró el recurso o modelo solicitado.",
+      "bad_request": "Ollama rechazó la solicitud. Revisa el modelo seleccionado y vuelve a intentarlo.",
+      "internal": "Ollama devolvió un error interno. Puede faltar memoria, el modelo puede estar corrupto o la solicitud puede ser demasiado larga.",
+      "busy": "Ollama no está disponible temporalmente o está ocupado. Espera unos segundos y vuelve a intentarlo.",
+      "http": "Ollama devolvió HTTP {status}.",
+      "invalid_model_name": "Nombre de modelo no válido.",
+      "cancelled": "Generación cancelada por el usuario.",
+      "empty_response": "Ollama no devolvió texto de respuesta. Prueba con otro modelo o reduce la instrucción."
+    }
   },
   "welcome": {
     "title": "¿Qué quieres crear hoy?",
@@ -423,7 +439,8 @@
       "clear_current": "Limpiar esta sección",
       "clear_all": "Borrar todo",
       "export_project": "Exportar proyecto",
-      "import_project": "Importar proyecto"
+      "import_project": "Importar proyecto",
+      "cancel": "Cancelar generación"
     },
     "nav": {
       "hint": "La entrada principal es una instrucción breve. Ollama la convierte en un artefacto completo; sin modelo activo se genera una estructura local de respaldo."
@@ -466,7 +483,14 @@
       "imported_body": "Se ha restaurado el proyecto local de Compo.",
       "import_error_title": "No se pudo importar",
       "import_error_body": "El archivo no parece ser un proyecto válido de Compo. Error: {message}",
-      "empty_model_response": "Ollama devolvió una respuesta vacía. Se usará la estructura local de respaldo; prueba con otro modelo o reduce la instrucción."
+      "empty_model_response": "Ollama devolvió una respuesta vacía. Se usará la estructura local de respaldo; prueba con otro modelo o reduce la instrucción.",
+      "cancelled_title": "Generación cancelada",
+      "cancelled_body": "Se ha cancelado la generación. Se conserva la estructura local de respaldo.",
+      "cancelled_partial_body": "Se ha cancelado la generación. Se conserva el texto parcial recibido hasta ese momento; puede estar incompleto, revísalo antes de usarlo.",
+      "truncated_title": "Salida truncada por límite de tokens",
+      "truncated_body": "El modelo alcanzó el límite máximo de generación y el resultado puede estar incompleto. Pulsa Regenerar, reduce la instrucción o usa un modelo con más capacidad.",
+      "done_body_score": "Resultado generado con el modelo local {model}. Calidad estimada del SKILL.md: {score}/100.",
+      "lint_title": "Generado con avisos de calidad ({score}/100)"
     },
     "advanced": {
       "summary": "Campos avanzados opcionales",
@@ -485,6 +509,10 @@
     "portable": {
       "label": "Modo portable",
       "help": "Genera la skill sin referencias a Claude para usarla también en otros asistentes (ChatGPT, asistentes locales, etc.)."
+    },
+    "autosave": {
+      "label": "Guardado de sesión",
+      "help": "Conserva instrucciones y resultados en la memoria de esta pestaña (sessionStorage) para sobrevivir a recargas accidentales. Se borra al cerrar la pestaña y no se escribe en disco. Desactivado por defecto."
     }
   },
   "usage": {

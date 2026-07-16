@@ -7,6 +7,8 @@
 (function() {
   'use strict';
 
+  const APP_VERSION = '0.1.14';
+
   const $  = (sel, root) => (root || document).querySelector(sel);
   const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
@@ -539,37 +541,35 @@ Aspectos no determinables con la información disponible y cuestiones que requie
     out = out.replace(/^```(?:markdown|md)?\s*/i, '').replace(/\s*```$/g, '').trim();
     if (type !== 'skill') return out;
 
-    // Correcciones prudentes de patrones que debilitan una skill activable y operativa.
-    out = out
-      .replace(/para garantizar ([^.\n]+)/gi, 'para revisar si contempla $1')
-      .replace(/revisión de cumplimiento/gi, 'revisión preliminar de cobertura')
-      .replace(/cumplimiento general/gi, 'cobertura general')
-      .replace(/<Cumple\s*\/\s*Parcialmente cumple\s*\/\s*No cumple>/gi, '<Adecuado / Parcial / Insuficiente / Ausente / No evaluable>')
-      .replace(/cumple,?\s+parcialmente cumple\s+o\s+no cumple/gi, 'Adecuado, Parcial, Insuficiente, Ausente o No evaluable')
-      .replace(/\bParcialmente cumple\b/g, 'Parcial')
-      .replace(/\bNo cumple\b/g, 'Insuficiente')
-      .replace(/\bCumple\b/g, 'Adecuado')
-      .replace(/\s*\(máximo\s+[0-9 . ,]+\s*(?:caracteres|tokens)\)/gi, '')
-      .replace(/\s*\(max(?:imum|\.)?\s+[0-9 . ,]+\s*(?:characters|tokens)\)/gi, '')
-      .replace(/No es adecuada para documentos que ya han sido procesados por un profesional de protección de datos y no requieren una segunda revisión\.?/gi, 'No usar para certificar cumplimiento legal ni para decidir publicación sin revisión responsable.')
-      .replace(/No debe usarse como única fuente de decisión para la publicación de documentos sensibles\.?/gi, 'No debe usarse como única base para publicar, difundir, transferir o reutilizar documentos sensibles.')
-      .replace(/No se extraen datos personales de la propuesta; se limita a la evaluación de la misma\.?/gi, 'No se facilita reidentificación ni reconstrucción de datos ocultos; la revisión debe minimizar la repetición de datos sensibles.')
-      .replace(/Añadir hash aleatorio/gi, 'Revisar si procede una generalización, supresión o sustitución controlada y documentada')
-      .replace(/\+ hash aleatorio/gi, '+ criterio de sustitución controlado y documentado')
-      .replace(/hash aleatorio/gi, 'seudónimo estable controlado, si procede y si existe criterio documentado')
-      .replace(/semilla segura/gi, 'criterio de generación y custodia definido por la institución')
-      .replace(/registro de auditoría con timestamps/gi, 'registro de decisiones con fecha, responsable y criterio aplicado')
-      .replace(/base de datos/gi, 'registro controlado')
-      .replace(/solo analiza texto plano; no procesa PDFs, imágenes ni realiza OCR\.?/gi, 'Trabaja sobre el contenido textual aportado o extraído en la conversación; no realiza OCR ni extracción técnica propia.')
-      .replace(/La skill requiere que el documento esté en texto plano; no procesa PDFs, imágenes ni formatos binarios\.?/gi, 'La skill trabaja sobre el contenido textual aportado o extraído en la conversación; no procesa archivos binarios ni realiza OCR por sí misma.');
+    // v0.1.14: se eliminan los reemplazos lexicos globales sobre el cuerpo.
+    // Reescribir "base de datos", "Cumple", "hash aleatorio", etc. en todo el
+    // texto corrompia contenido legitimo (una skill sobre bases de datos
+    // documentales quedaba alterada en silencio). La politica de calidad se
+    // aplica ahora de forma NO destructiva mediante CompoSkillLint, que
+    // detecta y explica los problemas sin tocar el texto (ver lintSkillText).
 
-    // Normaliza y repara defensivamente el frontmatter. Esto evita que un modelo local
-    // entregue SKILL.md con YAML incompleto, texto antes del frontmatter, campos sensibles
-    // o metadata demasiado genérica.
+    // Se mantiene la normalizacion estructural del frontmatter: es
+    // determinista, acotada a la cabecera YAML y necesaria porque los
+    // modelos locales entregan a veces YAML incompleto o texto previo.
     out = normalizeSkillMarkdown(out);
     const validation = validateSkillFrontmatter(out);
     if (!validation.valid) out = normalizeSkillMarkdown(out);
     return out.trim();
+  }
+
+  /**
+   * Linter no destructivo del SKILL.md actual. Devuelve null si no procede,
+   * o { score, valid, messages } con los hallazgos en el idioma activo.
+   */
+  function lintSkillText(text) {
+    if (!window.CompoSkillLint || !safeText(text)) return null;
+    const result = CompoSkillLint.lintSkill(text);
+    const described = CompoSkillLint.describeFindings(result.findings, CompoI18n.current);
+    return {
+      score: result.score,
+      valid: result.valid,
+      messages: described.map(f => (f.severity === 'error' ? 'X ' : '- ') + f.message)
+    };
   }
 
 
@@ -736,9 +736,58 @@ Aspectos no determinables con la información disponible y cuestiones que requie
     templates: {},
     templatesReady: false,
     generating: false,
+    abortGenerate: null,
 
     readPortable() {
       try { return localStorage.getItem('compo_portable') === '1'; } catch { return false; }
+    },
+
+    // ---------------------------------------------------------------- //
+    // Guardado de sesión opt-in (v0.1.14).
+    // Usa sessionStorage: sobrevive a recargas accidentales de la pestaña
+    // pero se destruye al cerrarla y nunca se escribe en disco de forma
+    // persistente. Desactivado por defecto, coherente con la política de
+    // persistencia mínima de Compo.
+    // ---------------------------------------------------------------- //
+    readAutosave() {
+      try { return sessionStorage.getItem('compo_autosave') === '1'; } catch { return false; }
+    },
+
+    writeAutosave(value) {
+      try {
+        if (value) sessionStorage.setItem('compo_autosave', '1');
+        else sessionStorage.removeItem('compo_autosave');
+      } catch { /* silencioso */ }
+    },
+
+    saveSession() {
+      if (!this.readAutosave()) return;
+      try {
+        sessionStorage.setItem('compo_session', JSON.stringify({
+          current_type: this.currentType,
+          state: this.state
+        }));
+      } catch { /* cuota o storage deshabilitado: silencioso */ }
+    },
+
+    clearSession() {
+      try { sessionStorage.removeItem('compo_session'); } catch { /* silencioso */ }
+    },
+
+    restoreSession() {
+      if (!this.readAutosave()) return;
+      try {
+        const raw = sessionStorage.getItem('compo_session');
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (!data || !data.state) return;
+        this.state = {
+          prompt: data.state.prompt && data.state.prompt.data ? data.state.prompt : this.emptySlot(),
+          agent: data.state.agent && data.state.agent.data ? data.state.agent : this.emptySlot(),
+          skill: data.state.skill && data.state.skill.data ? data.state.skill : this.emptySlot()
+        };
+        if (['prompt', 'agent', 'skill'].includes(data.current_type)) this.currentType = data.current_type;
+      } catch { /* sesión corrupta: se ignora */ }
     },
 
     writePortable(value) {
@@ -843,8 +892,23 @@ Aspectos no determinables con la información disponible y cuestiones que requie
 
     init() {
       this.state = { prompt: this.emptySlot(), agent: this.emptySlot(), skill: this.emptySlot() };
+      this.restoreSession();
       this.templates = this.builtinTemplates();
       this.loadExternalTemplates();
+
+      // Aviso antes de abandonar la pestaña si hay trabajo sin guardar y el
+      // guardado de sesión está desactivado.
+      window.addEventListener('beforeunload', (e) => {
+        if (this.readAutosave()) return;
+        const dirty = ['prompt', 'agent', 'skill'].some(k => {
+          const s = this.state[k];
+          return s && (safeText(s.output) || safeText(s.data && s.data.brief));
+        });
+        if (dirty) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      });
 
       document.addEventListener('click', (e) => {
         const start = e.target.closest('[data-start-builder]');
@@ -889,6 +953,7 @@ Aspectos no determinables con la información disponible y cuestiones que requie
       const actions = {
         generate: () => this.generate('normal'),
         regenerate: () => this.generate('regenerate'),
+        'cancel-generation': () => this.cancelGeneration(),
         review: () => this.reviewOutput(),
         'improve-instruction': () => this.improveInstruction(),
         'clear-result': () => this.clearResult(),
@@ -988,6 +1053,7 @@ Aspectos no determinables con la información disponible y cuestiones que requie
       if (output) slot.output = CompoSecurity.stripControlChars(output.value);
       const review = $('#builder-review-output');
       if (review) slot.review = CompoSecurity.stripControlChars(review.value);
+      this.saveSession();
     },
 
     render() {
@@ -1032,7 +1098,23 @@ Aspectos no determinables con la información disponible y cuestiones que requie
         <button id="builder-improve" class="compo-btn" type="button" data-builder-action="improve-instruction" data-i18n="builder.actions.improve_instruction">Mejorar instrucción</button>
         <button id="builder-clear-current" class="compo-btn" type="button" data-builder-action="clear-current" data-i18n="builder.actions.clear_current">Limpiar esta sección</button>
         <button id="builder-clear-all" class="compo-btn compo-btn-danger" type="button" data-builder-action="clear-all" data-i18n="builder.actions.clear_all">Borrar todo</button>
+        <button id="builder-cancel" class="compo-btn compo-btn-danger" type="button" hidden data-builder-action="cancel-generation" data-i18n="builder.actions.cancel">Cancelar generación</button>
       `;
+      // Toggle "guardado de sesión" (opt-in, sessionStorage) para todas las tipologías.
+      const autosaveWrap = document.createElement('label');
+      autosaveWrap.className = 'compo-portable-toggle';
+      const autosaveOn = this.readAutosave();
+      autosaveWrap.innerHTML = `
+        <input type="checkbox" id="builder-autosave"${autosaveOn ? ' checked' : ''} aria-describedby="builder-autosave-help">
+        <span class="compo-portable-toggle-text" data-i18n="builder.autosave.label">Guardado de sesión</span>
+        <span id="builder-autosave-help" class="compo-portable-toggle-help" data-i18n="builder.autosave.help">Conserva el trabajo en la memoria de esta pestaña para sobrevivir a recargas. Se borra al cerrar la pestaña; no se escribe en disco.</span>
+      `;
+      wrap.appendChild(autosaveWrap);
+      autosaveWrap.querySelector('#builder-autosave').addEventListener('change', (e) => {
+        this.writeAutosave(e.target.checked);
+        if (e.target.checked) this.saveSession();
+        else this.clearSession();
+      });
       // Toggle "modo portable" solo para skills.
       if (this.currentType === 'skill') {
         const toggleWrap = document.createElement('label');
@@ -1223,23 +1305,37 @@ Aspectos no determinables con la información disponible y cuestiones que requie
         ? this.localRegeneratedDraft(this.currentType, data, slot.output)
         : this.localDraft(this.currentType, data);
       const generateBtn = $('#builder-generate');
+      const outEl = $('#builder-output');
       this.generating = true;
+      this.abortGenerate = new AbortController();
       this.setGenerating(true);
       this.showStatus('info', mode === 'regenerate' ? CompoI18n.t('builder.status.regenerating_title') : CompoI18n.t('builder.status.generating_title'), CompoI18n.t('builder.status.generating_body'));
 
       let finalText = localDraft;
       let usedModel = null;
       let finalStatus = null;
+      let truncated = false;
       try {
         if (CompoOllama.available && CompoOllama.activeModel) {
+          // Streaming: el resultado se muestra token a token en el textarea,
+          // lo que permite ver el progreso y cancelar sin esperas a ciegas.
+          if (outEl) outEl.value = '';
           const response = await CompoOllama.generate({
             system: await this.systemPrompt(this.currentType, mode),
             prompt: await this.userPrompt(this.currentType, data, localDraft, mode),
+            signal: this.abortGenerate.signal,
+            onToken: (chunk, full) => {
+              if (outEl && CompoRouter.current === 'builder') {
+                outEl.value = full;
+                outEl.scrollTop = outEl.scrollHeight;
+              }
+            },
             options: { temperature: mode === 'regenerate' ? 0.38 : 0.16, top_p: 0.86, num_predict: this.currentType === 'skill' ? 4800 : 3600 }
           });
           if (safeText(response.text)) {
             finalText = safeText(response.text);
             usedModel = response.model || CompoOllama.activeModel;
+            truncated = !!response.truncated;
           } else {
             throw new Error(CompoI18n.t('builder.status.empty_model_response'));
           }
@@ -1247,10 +1343,23 @@ Aspectos no determinables con la información disponible y cuestiones que requie
           finalStatus = { kind: 'warning', title: CompoI18n.t('builder.status.local_title'), body: CompoI18n.t('builder.status.local_body') };
         }
       } catch (err) {
-        finalText = localDraft + '\n\n---\n\n' + CompoI18n.t('builder.status.ollama_error_append', { message: err.message });
-        finalStatus = { kind: 'warning', title: CompoI18n.t('builder.status.ollama_error_title'), body: CompoI18n.t('builder.status.ollama_error_body', { message: err.message }) };
+        if (err && err.cancelled) {
+          const partial = safeText(err.partialText || '');
+          if (partial) {
+            finalText = partial;
+            usedModel = CompoOllama.activeModel;
+            finalStatus = { kind: 'warning', title: CompoI18n.t('builder.status.cancelled_title'), body: CompoI18n.t('builder.status.cancelled_partial_body') };
+          } else {
+            finalText = localDraft;
+            finalStatus = { kind: 'warning', title: CompoI18n.t('builder.status.cancelled_title'), body: CompoI18n.t('builder.status.cancelled_body') };
+          }
+        } else {
+          finalText = localDraft + '\n\n---\n\n' + CompoI18n.t('builder.status.ollama_error_append', { message: err.message });
+          finalStatus = { kind: 'warning', title: CompoI18n.t('builder.status.ollama_error_title'), body: CompoI18n.t('builder.status.ollama_error_body', { message: err.message }) };
+        }
       } finally {
         this.generating = false;
+        this.abortGenerate = null;
         this.setGenerating(false);
         if (generateBtn) generateBtn.disabled = false;
       }
@@ -1258,10 +1367,27 @@ Aspectos no determinables con la información disponible y cuestiones que requie
       finalText = postProcessGenerated(this.currentType, finalText);
       this.commitOutput(finalText, usedModel, cfg.filename(data), mode);
       this.render();
-      if (usedModel) {
-        this.showStatus('info', CompoI18n.t('builder.status.done_title'), CompoI18n.t('builder.status.done_body', { model: usedModel }));
-      } else if (finalStatus) {
+
+      // Prioridad de estados: truncamiento > incidencia > lint > éxito.
+      if (truncated) {
+        this.showStatus('warning', CompoI18n.t('builder.status.truncated_title'), CompoI18n.t('builder.status.truncated_body'));
+        return;
+      }
+      if (finalStatus) {
         this.showStatus(finalStatus.kind, finalStatus.title, finalStatus.body);
+        return;
+      }
+      if (usedModel) {
+        const lint = this.currentType === 'skill' ? lintSkillText(finalText) : null;
+        if (lint && lint.messages.length) {
+          this.showStatus('warning',
+            CompoI18n.t('builder.status.lint_title', { score: lint.score }),
+            lint.messages.slice(0, 4).join(' '));
+        } else if (lint) {
+          this.showStatus('info', CompoI18n.t('builder.status.done_title'), CompoI18n.t('builder.status.done_body_score', { model: usedModel, score: lint.score }));
+        } else {
+          this.showStatus('info', CompoI18n.t('builder.status.done_title'), CompoI18n.t('builder.status.done_body', { model: usedModel }));
+        }
       }
     },
 
@@ -1273,6 +1399,7 @@ Aspectos no determinables con la información disponible y cuestiones que requie
       const data = slot.data || {};
       if (!this.validate(data, cfg)) return;
       this.generating = true;
+      this.abortGenerate = new AbortController();
       this.setGenerating(true);
       this.showStatus('info', CompoI18n.t('builder.status.improving_title'), CompoI18n.t('builder.status.improving_body'));
       let improved = this.localImprovedInstruction(data.brief);
@@ -1282,6 +1409,7 @@ Aspectos no determinables con la información disponible y cuestiones que requie
           const response = await CompoOllama.generate({
             system: await this.systemPrompt(this.currentType, 'improve'),
             prompt: await this.userPrompt(this.currentType, data, '', 'improve'),
+            signal: this.abortGenerate.signal,
             options: { temperature: 0.25, top_p: 0.85, num_predict: 1800 }
           });
           if (safeText(response.text)) {
@@ -1290,9 +1418,14 @@ Aspectos no determinables con la información disponible y cuestiones que requie
           }
         }
       } catch (err) {
-        this.showStatus('warning', CompoI18n.t('builder.status.ollama_error_title'), CompoI18n.t('builder.status.ollama_error_body', { message: err.message }));
+        if (err && err.cancelled) {
+          this.showStatus('warning', CompoI18n.t('builder.status.cancelled_title'), CompoI18n.t('builder.status.cancelled_body'));
+        } else {
+          this.showStatus('warning', CompoI18n.t('builder.status.ollama_error_title'), CompoI18n.t('builder.status.ollama_error_body', { message: err.message }));
+        }
       } finally {
         this.generating = false;
+        this.abortGenerate = null;
         this.setGenerating(false);
       }
       slot.data.brief = improved;
@@ -1307,6 +1440,7 @@ Aspectos no determinables con la información disponible y cuestiones que requie
       if (!safeText(slot.output)) return;
       const data = slot.data || {};
       this.generating = true;
+      this.abortGenerate = new AbortController();
       this.setGenerating(true);
       this.showStatus('info', CompoI18n.t('builder.status.reviewing_title'), CompoI18n.t('builder.status.reviewing_body'));
       let review = this.localReviewDraft(this.currentType, slot.output);
@@ -1316,6 +1450,7 @@ Aspectos no determinables con la información disponible y cuestiones que requie
           const response = await CompoOllama.generate({
             system: await this.systemPrompt(this.currentType, 'review'),
             prompt: await this.userPrompt(this.currentType, data, '', 'review'),
+            signal: this.abortGenerate.signal,
             options: { temperature: 0.12, top_p: 0.85, num_predict: 3500 }
           });
           if (safeText(response.text)) {
@@ -1324,9 +1459,14 @@ Aspectos no determinables con la información disponible y cuestiones que requie
           }
         }
       } catch (err) {
-        review += '\n\n' + CompoI18n.t('builder.status.ollama_error_append', { message: err.message });
+        if (err && err.cancelled && safeText(err.partialText)) {
+          review = safeText(err.partialText) + '\n\n' + CompoI18n.t('builder.status.cancelled_partial_body');
+        } else if (!(err && err.cancelled)) {
+          review += '\n\n' + CompoI18n.t('builder.status.ollama_error_append', { message: err.message });
+        }
       } finally {
         this.generating = false;
+        this.abortGenerate = null;
         this.setGenerating(false);
       }
       slot.review = review;
@@ -1358,6 +1498,15 @@ Aspectos no determinables con la información disponible y cuestiones que requie
         const el = $('#' + id);
         if (el) el.disabled = !!flag;
       });
+      const cancel = $('#builder-cancel');
+      if (cancel) {
+        cancel.hidden = !flag;
+        cancel.disabled = !flag;
+      }
+    },
+
+    cancelGeneration() {
+      if (this.abortGenerate) this.abortGenerate.abort();
     },
 
     localDraft(type, data) {
@@ -1471,6 +1620,7 @@ El resultado debe considerarse una propuesta de apoyo. Si se va a usar en produc
       const ok = window.confirm(CompoI18n.t('builder.status.clear_all_confirm'));
       if (!ok) return;
       this.state = { prompt: this.emptySlot(), agent: this.emptySlot(), skill: this.emptySlot() };
+      this.clearSession();
       this.render();
     },
 
@@ -1571,7 +1721,11 @@ El resultado debe considerarse una propuesta de apoyo. Si se va a usar en produc
       if (!safeText(slot.output)) return;
       const findings = CompoSecurity.detectPII(slot.output);
       if (findings.length) {
-        const labels = findings.map(f => f.label).join(', ');
+        // Se muestran los hallazgos enmascarados (2 primeros + último carácter)
+        // para poder decidir con criterio sin repetir el dato completo.
+        const labels = findings
+          .map(f => f.label + ' (' + f.matches.map(CompoSecurity.maskFinding).join(', ') + ')')
+          .join('; ');
         const ok = window.confirm(CompoI18n.t('builder.status.pii_confirm', { labels }));
         if (!ok) return;
       }
@@ -1590,7 +1744,7 @@ El resultado debe considerarse una propuesta de apoyo. Si se va a usar en produc
       this.capture();
       const payload = {
         app: 'Compo',
-        version: '0.1.13',
+        version: APP_VERSION,
         exported_at: new Date().toISOString(),
         current_type: this.currentType,
         state: this.state

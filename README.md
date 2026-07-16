@@ -5,7 +5,7 @@
 
 **Motor local para componer prompts, agentes y skills** con asistencia IA opcional. Sin telemetría, sin servicios externos.
 
-Versión: 0.1.13 (beta pública source-available)
+Versión: 0.1.14 (beta pública source-available)
 
 ---
 
@@ -128,15 +128,18 @@ compo-v0.1/
 │   ├── theme.js            ← tema claro/oscuro/auto
 │   ├── i18n.js             ← idioma ES/EN
 │   ├── router.js           ← navegación
-│   ├── ollama.js           ← cliente Ollama: detectar, listar, descargar y generar
-│   ├── security.js         ← sanitización, detector PII, envoltorios seguros para LLM
+│   ├── ollama.js           ← cliente Ollama: detectar, listar, descargar y generar en streaming
+│   ├── security.js         ← sanitización, detector PII (con checksum DNI/NIE), envoltorios seguros para LLM
+│   ├── skill-lint.js       ← linter determinista de SKILL.md con puntuación y hallazgos
 │   └── compo.js            ← builder asistido, plantillas y exportación
 ├── i18n/                   ← cadenas ES/EN
 ├── prompts/                ← prompts internos editables
 ├── plantillas/             ← plantillas JSON por tipología
 ├── assets/                 ← logo SVG/PNG/ICO
 ├── online/                 ← CSS adaptado para la versión online/manual
-└── docs/                   ← documentación
+├── docs/                   ← documentación
+├── tests/                  ← suite de tests (node --test, sin dependencias)
+└── tools/                  ← script de release (zip de distribución limpio)
 ```
 
 La versión 0.1.13 mantiene la estructura modular parcial de v0.1.3, conserva el apagado local de v0.1.5 y refuerza la generación de skills operativas. Además de mejorar `name`, `description` y `when_to_use`, endurece el cuerpo de la skill para evitar lenguaje de certificación, promesas absolutas, límites arbitrarios, tablas sin evidencia y recomendaciones técnicas no implementadas. En skills de anonimización, seudonimización o protección de datos, el generador exige no facilitar reidentificación, minimizar evidencia sensible, evitar reconstrucción de datos ocultos y distinguir revisión preliminar de validación legal. Los prompts internos están en `/prompts/` y las plantillas en `/plantillas/`. Se mantiene un único `compo.js` para no sobrerrefactorizar antes de cerrar la beta funcional, pero ya queda preparado el camino para separar en módulos `compo-ai.js`, `compo-builder.js` y `compo-templates.js` si el proyecto crece.
@@ -181,11 +184,18 @@ Desde v0.1.13, Compo deja de distribuirse bajo MIT y pasa a utilizar una licenci
 - Detección heurística de PII antes de descargar.
 - Gestión básica de modelos Ollama: detectar, actualizar lista, elegir y descargar. Por seguridad operativa, Compo no borra modelos locales desde la interfaz.
 - Botón **Apagar** que detiene el servidor local de Compo cuando se ha arrancado con `start.bat` o `start.sh`.
+- Generación en **streaming** con botón de cancelación y aviso de salida truncada (`done_reason`).
+- Contexto explícito (`num_ctx`) para evitar truncamiento silencioso de los prompts internos.
+- **Linter de calidad de SKILL.md** (puntuación 0-100 y hallazgos, no destructivo) mostrado tras generar.
+- Detección de Ollama en `127.0.0.1` y `localhost` (evita fallos IPv6).
+- Guardado de sesión opt-in en memoria de pestaña (sessionStorage), con aviso antes de cerrar si está desactivado.
+- Validación de dígito de control en la detección de DNI/NIE y aviso PII con hallazgos enmascarados.
+- Servidor local endurecido: dotfiles bloqueados y listado de directorios desactivado.
+- Suite de tests automatizados (`node --test tests/*.js`).
 
 **Pendiente para beta más sólida:**
 
 - Importar y auditar `SKILL.md` existentes.
-- Añadir una puntuación específica de calidad para `SKILL.md`.
 - Añadir una acción visible de “Reparar YAML” para reconstruir manualmente solo el frontmatter cuando el usuario edite una skill.
 - Añadir comparación visual entre versiones generadas.
 - Incorporar tests de UI con Playwright.

@@ -41,7 +41,23 @@
     "active_with_model": "Local AI assistance active · Model: {model}",
     "inactive_help": "Tap here to set up Ollama",
     "ephemeral": "Ephemeral mode",
-    "open_settings": "Open model settings"
+    "open_settings": "Open model settings",
+    "errors": {
+      "generate_timeout": "Local generation exceeded the maximum time. Try a lighter model, shorten the instruction, or regenerate.",
+      "timeout": "The Ollama operation exceeded the maximum time.",
+      "unreachable": "Could not connect to Ollama (both 127.0.0.1 and localhost on port 11434 are tried). Check that Ollama is installed, running and reachable from this browser.",
+      "unknown": "Unknown error while communicating with Ollama.",
+      "detail": "Detail: {details}",
+      "model_not_found": "The selected model was not found in Ollama. Refresh the model list or download/select another model.",
+      "resource_not_found": "Ollama could not find the requested resource or model.",
+      "bad_request": "Ollama rejected the request. Check the selected model and try again.",
+      "internal": "Ollama returned an internal error. It may be out of memory, the model may be corrupt, or the request may be too long.",
+      "busy": "Ollama is temporarily unavailable or busy. Wait a few seconds and try again.",
+      "http": "Ollama returned HTTP {status}.",
+      "invalid_model_name": "Invalid model name.",
+      "cancelled": "Generation cancelled by the user.",
+      "empty_response": "Ollama returned no response text. Try another model or shorten the instruction."
+    }
   },
   "welcome": {
     "title": "What do you want to build today?",
@@ -423,7 +439,8 @@
       "clear_current": "Clear this section",
       "clear_all": "Delete all",
       "export_project": "Export project",
-      "import_project": "Import project"
+      "import_project": "Import project",
+      "cancel": "Cancel generation"
     },
     "nav": {
       "hint": "The main input is a short instruction. Ollama turns it into a full artefact; without an active model, Compo generates a local fallback structure."
@@ -466,7 +483,14 @@
       "imported_body": "The local Compo project was restored.",
       "import_error_title": "Import failed",
       "import_error_body": "The file does not seem to be a valid Compo project. Error: {message}",
-      "empty_model_response": "Ollama returned an empty response. Compo will use the local fallback structure; try another model or shorten the instruction."
+      "empty_model_response": "Ollama returned an empty response. Compo will use the local fallback structure; try another model or shorten the instruction.",
+      "cancelled_title": "Generation cancelled",
+      "cancelled_body": "Generation was cancelled. The local fallback structure is kept.",
+      "cancelled_partial_body": "Generation was cancelled. The partial text received so far is kept; it may be incomplete, review it before use.",
+      "truncated_title": "Output truncated by token limit",
+      "truncated_body": "The model reached the maximum generation limit and the result may be incomplete. Press Regenerate, shorten the instruction, or use a larger model.",
+      "done_body_score": "Result generated with local model {model}. Estimated SKILL.md quality: {score}/100.",
+      "lint_title": "Generated with quality warnings ({score}/100)"
     },
     "advanced": {
       "summary": "Optional advanced fields",
@@ -485,6 +509,10 @@
     "portable": {
       "label": "Portable mode",
       "help": "Generates the skill without references to Claude so it can be used with other assistants (ChatGPT, local assistants, etc.)."
+    },
+    "autosave": {
+      "label": "Session backup",
+      "help": "Keeps instructions and results in this tab's memory (sessionStorage) to survive accidental reloads. Cleared when the tab closes; never written to disk. Off by default."
     }
   },
   "usage": {
