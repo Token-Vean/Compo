@@ -1,0 +1,93 @@
+name: Security checks
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security-checks:
+    name: Static syntax and security checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Install Python security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit
+
+      - name: Validate JavaScript syntax
+        run: |
+          for f in js/*.js; do node --check "$f"; done
+
+      - name: Run test suite
+        run: |
+          node --test tests/test-security.js tests/test-skill-lint.js
+
+      - name: Compile Python files
+        run: |
+          python -m py_compile server.py tools/release.py
+
+      - name: Run Bandit
+        run: |
+          bandit -r . -x ./.git,./dist,./build,./__pycache__ -ll
+
+      - name: Check local server hardening (Host, Origin, dotfiles)
+        run: |
+          python server.py --port 18765 > server.log 2>&1 &
+          SERVER_PID=$!
+          for i in $(seq 1 30); do
+            curl -s -o /dev/null http://127.0.0.1:18765/compo.html && break
+            sleep 0.5
+          done
+          code() { curl -s -o /dev/null -w "%{http_code}" "$@"; }
+          expect() {
+            if [ "$1" != "$2" ]; then echo "FAIL: $3 -> $1 (expected $2)"; cat server.log; exit 1; fi
+            echo "ok: $3 -> $1"
+          }
+          expect "$(code http://127.0.0.1:18765/compo.html)" 200 "GET with local Host"
+          expect "$(code -H 'Host: localhost:18765' http://127.0.0.1:18765/compo.html)" 200 "GET with localhost Host"
+          expect "$(code -H 'Host: evil.example' http://127.0.0.1:18765/compo.html)" 421 "GET with foreign Host"
+          expect "$(code -I -H 'Host: evil.example' http://127.0.0.1:18765/compo.html)" 421 "HEAD with foreign Host"
+          expect "$(code -X POST -H 'Host: evil.example' -H 'Origin: http://127.0.0.1:18765' http://127.0.0.1:18765/__compo_shutdown)" 421 "POST with foreign Host"
+          expect "$(code http://127.0.0.1:18765/.git/config)" 404 "dotfile path"
+          kill "$SERVER_PID" || true
+
+      - name: Check unwanted committed files
+        run: |
+          if git ls-files | grep -E '(^|/)(__pycache__|\.env$|.*\.log$|.*\.pyc$|\.DS_Store$|Thumbs\.db$)'; then
+            echo "Unwanted committed file found."
+            exit 1
+          fi
+
+      - name: Check high-confidence committed secrets
+        run: |
+          if git grep -nEI -e "-----BEGIN (RSA |DSA |EC |OPENSSH |PGP )?PRIVATE KEY-----" -- .; then
+            echo "Private key material found."
+            exit 1
+          fi
+
+          if git grep -nEI -e "(AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z\-_]{35}|sk-[A-Za-z0-9]{20,})" -- .; then
+            echo "High-confidence credential-like string found."
+            exit 1
+          fi
