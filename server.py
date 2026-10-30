@@ -5,6 +5,12 @@ Compo · servidor local
 Servidor HTTP estático limitado a localhost con un endpoint interno de apagado.
 No expone Compo en la red y no requiere dependencias externas.
 
+Mejoras de seguridad posteriores a v0.1.14:
+- Validación de la cabecera Host en todas las peticiones (mitiga DNS
+  rebinding): una página maliciosa que haga resolver su dominio a 127.0.0.1
+  sigue enviando su propio dominio en Host y recibe 421. Mismo patrón que
+  Cumplø.
+
 Mejoras de seguridad respecto a v0.1.13:
 - Bloqueo de archivos y directorios ocultos (dotfiles): rutas que contengan
   un componente que empiece por "." devuelven 404. Evita servir .git,
@@ -51,6 +57,12 @@ ALLOWED_ORIGINS_TEMPLATE = (
     "http://127.0.0.1:{port}",
 )
 
+# Hosts permitidos en la cabecera Host (mitigación de DNS rebinding).
+ALLOWED_HOSTS_TEMPLATE = (
+    "127.0.0.1:{port}",
+    "localhost:{port}",
+)
+
 # Política de seguridad de contenido enviada por HTTP.
 CSP = (
     "default-src 'self'; "
@@ -94,6 +106,7 @@ class CompoServer(ThreadingHTTPServer):
     allow_reuse_address = True
     daemon_threads = True
     allowed_origins = ()
+    allowed_hosts = ()
 
 
 class CompoHandler(SimpleHTTPRequestHandler):
@@ -152,6 +165,22 @@ class CompoHandler(SimpleHTTPRequestHandler):
     # ------------------------------------------------------------------ #
     # Helpers internos
     # ------------------------------------------------------------------ #
+    def _host_ok(self):
+        """La cabecera Host debe ser una de las direcciones locales esperadas.
+
+        Mitiga DNS rebinding: una web maliciosa que apunte su dominio a
+        127.0.0.1 envía su propio dominio en Host y no coincide con la lista.
+        """
+        host = (self.headers.get("Host") or "").strip().lower()
+        return bool(host) and host in self.server.allowed_hosts
+
+    def _reject_bad_host(self):
+        """Responde 421 y devuelve True si el Host no es local."""
+        if self._host_ok():
+            return False
+        self.send_error(421, "Misdirected Request")
+        return True
+
     def _origin_ok(self):
         """Comprobación de origen para endpoints internos. Acepta Origin o,
         si no llega (algunos navegadores antiguos), Sec-Fetch-Site=same-origin
@@ -182,6 +211,8 @@ class CompoHandler(SimpleHTTPRequestHandler):
     # Métodos HTTP
     # ------------------------------------------------------------------ #
     def do_GET(self):  # noqa: N802 - nombre impuesto por http.server
+        if self._reject_bad_host():
+            return
         path = self.path.split("?", 1)[0]
         if path == "/__compo_health":
             if not self._origin_ok():
@@ -195,7 +226,14 @@ class CompoHandler(SimpleHTTPRequestHandler):
             return
         super().do_GET()
 
+    def do_HEAD(self):  # noqa: N802 - nombre impuesto por http.server
+        if self._reject_bad_host():
+            return
+        super().do_HEAD()
+
     def do_POST(self):  # noqa: N802 - nombre impuesto por http.server
+        if self._reject_bad_host():
+            return
         path = self.path.split("?", 1)[0]
         if path != "/__compo_shutdown":
             self.send_error(404, "Not found")
@@ -269,6 +307,9 @@ def main():
     server = _bind_server(args.host, args.port, CompoHandler)
     server.allowed_origins = tuple(
         tpl.format(port=args.port) for tpl in ALLOWED_ORIGINS_TEMPLATE
+    )
+    server.allowed_hosts = tuple(
+        tpl.format(port=args.port) for tpl in ALLOWED_HOSTS_TEMPLATE
     )
 
     url = f"http://{args.host}:{args.port}/compo.html"

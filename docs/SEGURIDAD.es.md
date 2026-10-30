@@ -132,3 +132,13 @@ Compo permite detectar, seleccionar y descargar modelos de Ollama, pero no borra
   hallazgos enmascarados en lugar del dato completo.
 - El guardado de sesión es opt-in, usa exclusivamente `sessionStorage`
   (memoria de la pestaña, se destruye al cerrarla) y nunca escribe en disco.
+
+## Endurecimiento posterior a v0.1.14 (sin publicar)
+
+- **DNS rebinding contra el propio servidor de Compo.** `server.py` valida la
+  cabecera `Host` en todas las peticiones (`GET`, `HEAD` y `POST`) y responde
+  421 si no es `127.0.0.1:<puerto>` o `localhost:<puerto>`. Una web maliciosa
+  que haga resolver su dominio a 127.0.0.1 envía su propio dominio en `Host` y
+  queda rechazada, también en `/__compo_health` y `/__compo_shutdown`. Es el
+  mismo control que ya aplicaba Cumplø. Consecuencia: si se arranca Compo con
+  `--host` apuntando a otra interfaz, solo responderá a los nombres locales.
