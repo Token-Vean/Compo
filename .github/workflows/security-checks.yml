@@ -71,6 +71,11 @@ jobs:
           expect "$(code -I -H 'Host: evil.example' http://127.0.0.1:18765/compo.html)" 421 "HEAD with foreign Host"
           expect "$(code -X POST -H 'Host: evil.example' -H 'Origin: http://127.0.0.1:18765' http://127.0.0.1:18765/__compo_shutdown)" 421 "POST with foreign Host"
           expect "$(code http://127.0.0.1:18765/.git/config)" 404 "dotfile path"
+          expect "$(code http://127.0.0.1:18765/%2egit/config)" 404 "dotfile path, percent-encoded"
+          expect "$(code http://127.0.0.1:18765/%2Egit/HEAD)" 404 "dotfile path, percent-encoded uppercase"
+          expect "$(code http://127.0.0.1:18765/%2egitignore)" 404 "dotfile file, percent-encoded"
+          expect "$(code http://127.0.0.1:18765/js/%2e%2e/%2egit/config)" 404 "dotfile path, encoded traversal"
+          expect "$(code http://127.0.0.1:18765/js/compo.js)" 200 "regular static file"
           kill "$SERVER_PID" || true
 
       - name: Check unwanted committed files

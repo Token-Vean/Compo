@@ -6,6 +6,8 @@ Servidor HTTP estático limitado a localhost con un endpoint interno de apagado.
 No expone Compo en la red y no requiere dependencias externas.
 
 Mejoras de seguridad posteriores a v0.1.14:
+- El bloqueo de dotfiles se evalúa sobre la ruta decodificada y sobre la
+  ruta real en disco: antes `/%2egit/config` eludía el filtro.
 - Validación de la cabecera Host en todas las peticiones (mitiga DNS
   rebinding): una página maliciosa que haga resolver su dominio a 127.0.0.1
   sigue enviando su propio dominio en Host y recibe 421. Mismo patrón que
@@ -39,6 +41,7 @@ import sys
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import unquote
 
 __version__ = "0.1.14"
 
@@ -94,12 +97,42 @@ def _is_allowed_origin(value, allowed):
 def _path_has_hidden_component(url_path):
     """True si algún componente de la ruta empieza por punto.
 
-    Se evalúa sobre la ruta URL ya sin query/fragment. Bloquea el acceso a
-    .git, .gitignore, .github, archivos de configuración ocultos, etc.,
-    incluso si por error terminan dentro de la distribución.
+    Se evalúa sobre la ruta URL sin query/fragment y YA DECODIFICADA, igual
+    que hace después ``translate_path``. Comprobar la ruta cruda permitía
+    eludir el bloqueo con codificación porcentual: ``/%2egit/config`` no
+    empieza por punto como texto, pero se resuelve a ``.git/config``.
+    Bloquea .git, .gitignore, .github, archivos de configuración ocultos,
+    etc., incluso si por error terminan dentro de la distribución.
     """
-    clean = posixpath.normpath(url_path.split("?", 1)[0].split("#", 1)[0])
+    raw = url_path.split("?", 1)[0].split("#", 1)[0]
+    try:
+        decoded = unquote(raw, errors="surrogatepass")
+    except UnicodeDecodeError:
+        decoded = unquote(raw)
+    decoded = decoded.replace("\\", "/")
+    clean = posixpath.normpath(decoded)
     return any(part.startswith(".") for part in clean.split("/") if part)
+
+
+def _fs_path_is_hidden_or_outside(fs_path, root):
+    """True si la ruta REAL en disco sale de ``root`` o toca un dotfile.
+
+    Defensa en profundidad sobre la ruta ya resuelta por el sistema de
+    ficheros: cubre alias que la comprobación textual no ve, como los
+    nombres cortos 8.3 de Windows (``GIT~1`` es ``.git``) o enlaces
+    simbólicos que apunten fuera de la carpeta de la aplicación.
+    """
+    try:
+        real = os.path.realpath(fs_path)
+        rel = os.path.relpath(real, os.path.realpath(root))
+    except (OSError, ValueError):
+        return True
+    if rel == os.curdir:
+        return False
+    parts = rel.split(os.sep)
+    if parts[0] == os.pardir:
+        return True
+    return any(part.startswith(".") for part in parts if part)
 
 
 class CompoServer(ThreadingHTTPServer):
@@ -134,6 +167,10 @@ class CompoHandler(SimpleHTTPRequestHandler):
         # 2) Nunca listar directorios: si la ruta resuelve a un directorio,
         #    solo se sirve si existe un index; en caso contrario, 404.
         path = self.translate_path(self.path)
+        # 1b) Misma regla sobre la ruta real en disco (alias 8.3, enlaces).
+        if _fs_path_is_hidden_or_outside(path, os.getcwd()):
+            self.send_error(404, "Not found")
+            return None
         if os.path.isdir(path):
             for index in ("index.html", "index.htm"):
                 if os.path.exists(os.path.join(path, index)):
