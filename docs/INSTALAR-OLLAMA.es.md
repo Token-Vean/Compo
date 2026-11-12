@@ -34,7 +34,11 @@ Si lo ves, está listo.
 
 ## 2. Configurar el origen autorizado (importante)
 
-Por defecto, Ollama acepta peticiones solo desde `localhost`. Como Compo se sirve desde `http://127.0.0.1:8765` o `http://localhost:8765`, conviene declararlo explícitamente para evitar bloqueos por CORS y reducir la superficie de ataque.
+Por defecto, Ollama acepta peticiones solo desde `localhost`. Como Compo se sirve desde `http://127.0.0.1:8770` o `http://localhost:8770`, conviene declararlo explícitamente para evitar bloqueos por CORS y reducir la superficie de ataque.
+
+> **Si vienes de una versión anterior de Compo.** Hasta ahora Compo usaba el puerto 8765, el mismo que Cumplø, y no podían estar abiertas a la vez. Desde este cambio Compo usa el **8770**. Si ya tenías `OLLAMA_ORIGINS` configurado con el 8765, sustitúyelo por el valor de abajo y reinicia Ollama; si no, Compo dejará de detectar Ollama.
+>
+> **Si usas varias herramientas de Token&Vean**, `OLLAMA_ORIGINS` debe incluir los orígenes de todas, separados por comas. Por ejemplo, para Compo y Cumplø: `http://127.0.0.1:8770,http://localhost:8770,http://127.0.0.1:8765,http://localhost:8765`.
 
 ### macOS
 
@@ -43,7 +47,7 @@ Edita el plist de Ollama o, si usas la app nativa, el ajuste se aplica automáti
 Para cambiarlo manualmente, en una terminal:
 
 ```bash
-launchctl setenv OLLAMA_ORIGINS "http://127.0.0.1:8765,http://localhost:8765"
+launchctl setenv OLLAMA_ORIGINS "http://127.0.0.1:8770,http://localhost:8770"
 ```
 
 Y reinicia Ollama desde el icono de la barra de menú.
@@ -58,7 +62,7 @@ Añade:
 
 ```ini
 [Service]
-Environment="OLLAMA_ORIGINS=http://127.0.0.1:8765,http://localhost:8765"
+Environment="OLLAMA_ORIGINS=http://127.0.0.1:8770,http://localhost:8770"
 ```
 
 Guarda, cierra y reinicia:
@@ -72,7 +76,7 @@ sudo systemctl restart ollama
 
 1. Busca "Variables de entorno" en el menú Inicio.
 2. Pulsa "Variables de entorno...".
-3. Crea una nueva variable de usuario llamada `OLLAMA_ORIGINS` con valor `http://127.0.0.1:8765,http://localhost:8765`.
+3. Crea una nueva variable de usuario llamada `OLLAMA_ORIGINS` con valor `http://127.0.0.1:8770,http://localhost:8770`.
 4. Cierra todas las ventanas pulsando Aceptar.
 5. Reinicia Ollama (cierra el icono de la barra y vuelve a abrir Ollama).
 
@@ -120,7 +124,7 @@ Estos cuatro son los que Compo ofrece como descarga directa desde la pantalla "M
 
 - Verifica que Ollama está corriendo: `http://localhost:11434/` en el navegador.
 - Si está en otro puerto distinto al 11434, Compo no lo encontrará todavía (en v0.1 el endpoint está fijo).
-- Revisa que `OLLAMA_ORIGINS` no esté restringiendo a un origen distinto al 8765.
+- Revisa que `OLLAMA_ORIGINS` no esté restringiendo a un origen distinto al 8770.
 
 ### El modelo tarda mucho
 
@@ -128,7 +132,7 @@ Es normal en la primera respuesta tras un periodo sin uso (Ollama tiene que carg
 
 ### El navegador dice "blocked by CORS policy"
 
-Indica que `OLLAMA_ORIGINS` no incluye `http://127.0.0.1:8765` o `http://localhost:8765`. Revísalo.
+Indica que `OLLAMA_ORIGINS` no incluye `http://127.0.0.1:8770` o `http://localhost:8770`. Revísalo.
 
 ### Borrar todos los modelos
 

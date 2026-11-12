@@ -16,7 +16,7 @@ Solo a estos sitios:
 1. **Memoria del navegador** mientras tienes Compo abierto. Al cerrar la pestaña, se pierde, salvo lo que has marcado para conservar.
 2. **localStorage del navegador**, únicamente para preferencias de configuración: `compo_theme`, `compo_lang`, `compo_model` y `compo_portable`. Nada de lo que escribes en formularios se persiste por defecto.
 3. **Tu Ollama local** (`http://localhost:11434`) si pulsas botones que invocan asistencia IA. Ollama corre en tu máquina; tampoco envía nada fuera.
-4. **El servidor local de Compo** (`http://127.0.0.1:8765`) si pulsas **Apagar**. Esa llamada solo solicita el cierre de la sesión local de Compo.
+4. **El servidor local de Compo** (`http://127.0.0.1:8770`) si pulsas **Apagar**. Esa llamada solo solicita el cierre de la sesión local de Compo.
 
 ## A dónde **no** van
 
@@ -30,7 +30,7 @@ Solo a estos sitios:
 1. Abre las herramientas de desarrollo del navegador (F12).
 2. Ve a la pestaña "Red" o "Network".
 3. Filtra por "Otros" o "All" y usa Compo.
-4. Observa: solo verás peticiones a `127.0.0.1:8765` (los archivos estáticos de Compo y el endpoint local de apagado) y, si invocas asistencia IA, a `127.0.0.1:11434` (tu Ollama).
+4. Observa: solo verás peticiones a `127.0.0.1:8770` (los archivos estáticos de Compo y el endpoint local de apagado) y, si invocas asistencia IA, a `127.0.0.1:11434` (tu Ollama).
 
 ## Detector de PII al exportar
 

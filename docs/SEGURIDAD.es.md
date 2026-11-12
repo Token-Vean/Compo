@@ -29,7 +29,7 @@ Compo se ejecuta en un entorno de confianza (la máquina del usuario), pero asum
 
 **Riesgo**: si Ollama está configurado con `OLLAMA_ORIGINS=*`, una web maliciosa abierta en otra pestaña podría usar DNS rebinding para acceder al Ollama del usuario y leer/borrar sus modelos o usar su capacidad de cómputo.
 
-**Mitigación**: la documentación de instalación (`docs/INSTALAR-OLLAMA.es.md`) instruye al usuario a configurar `OLLAMA_ORIGINS=http://127.0.0.1:8765,http://localhost:8765` (origen exacto de Compo), nunca `*`. La CSP de Compo, además, limita `connect-src` a `http://localhost:11434`, así que aunque algún script ajeno consiguiera ejecutarse en el contexto de Compo no podría hablar con servidores externos.
+**Mitigación**: la documentación de instalación (`docs/INSTALAR-OLLAMA.es.md`) instruye al usuario a configurar `OLLAMA_ORIGINS=http://127.0.0.1:8770,http://localhost:8770` (origen exacto de Compo), nunca `*`. La CSP de Compo, además, limita `connect-src` a `http://localhost:11434`, así que aunque algún script ajeno consiguiera ejecutarse en el contexto de Compo no podría hablar con servidores externos.
 
 ### A5. Manipulación del paquete antes de instalación
 

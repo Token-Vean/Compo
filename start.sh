@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ===========================================================================
 # Compo · Arranque Linux/macOS
-# Levanta el servidor local de Compo en 127.0.0.1:8765, abre la aplicación
+# Levanta el servidor local de Compo en 127.0.0.1:8770, abre la aplicación
 # y permite apagar la sesión desde la propia interfaz.
 # ===========================================================================
 
 set -e
 
-PORT=8765
+PORT=8770
 HOST=127.0.0.1
 URL="http://${HOST}:${PORT}/compo.html"
 

@@ -319,7 +319,7 @@ def _bind_server(host, port, handler):
                 f"    Otra instancia de Compo (o de algun otro programa) esta\n"
                 f"    escuchando en ese puerto. Cierra esa instancia o arranca\n"
                 f"    Compo en otro puerto:\n\n"
-                f"      python3 server.py --port 8766\n\n"
+                f"      python3 server.py --port 8780\n\n"
             )
             sys.exit(2)
         raise
@@ -328,7 +328,7 @@ def _bind_server(host, port, handler):
 def main():
     parser = argparse.ArgumentParser(description="Servidor local de Compo")
     parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--port", type=int, default=8770)
     args = parser.parse_args()
 
     if args.host not in ("127.0.0.1", "localhost"):
