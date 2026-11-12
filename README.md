@@ -41,7 +41,7 @@ Doble clic en `start.bat` o desde una terminal:
 start.bat
 ```
 
-Se abrirá `http://127.0.0.1:8765/compo.html` en el navegador. Puedes cerrar la sesión desde el botón **Apagar** de la interfaz o con Ctrl+C en la terminal.
+Se abrirá `http://127.0.0.1:8770/compo.html` en el navegador. Puedes cerrar la sesión desde el botón **Apagar** de la interfaz o con Ctrl+C en la terminal.
 
 ### Acceso directo con icono en Windows
 

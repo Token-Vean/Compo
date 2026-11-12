@@ -43,7 +43,7 @@ start.bat
 La aplicación se abrirá en:
 
 ```text
-http://127.0.0.1:8765/compo.html
+http://127.0.0.1:8770/compo.html
 ```
 
 ## 4 bis. Crear acceso directo con icono de Compo en Windows
@@ -81,10 +81,10 @@ Pulsa **Apagar** en la interfaz. Esto cierra el servidor local de Compo. Ollama 
 
 ### El navegador no abre Compo
 
-Comprueba que la consola no indica que el puerto 8765 está ocupado. Si lo está, cierra otra instancia o ejecuta:
+Comprueba que la consola no indica que el puerto 8770 está ocupado. Si lo está, cierra otra instancia o ejecuta:
 
 ```cmd
-python server.py --port 8766
+python server.py --port 8780
 ```
 
 ### Compo no detecta Ollama

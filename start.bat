@@ -1,7 +1,7 @@
 @echo off
 REM ===========================================================================
 REM Compo - Arranque Windows (v0.1.14)
-REM Levanta el servidor local de Compo en 127.0.0.1:8765, abre la aplicacion
+REM Levanta el servidor local de Compo en 127.0.0.1:8770, abre la aplicacion
 REM y permite apagar la sesion desde la propia interfaz.
 REM
 REM v0.1.14: deteccion robusta de Python. En Windows, "python" puede ser el
@@ -11,7 +11,7 @@ REM el interprete responde de verdad antes de usarlo.
 REM ===========================================================================
 
 setlocal
-set PORT=8765
+set PORT=8770
 set HOST=127.0.0.1
 set URL=http://%HOST%:%PORT%/compo.html
 set PYCMD=
